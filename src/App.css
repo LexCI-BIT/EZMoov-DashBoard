@@ -19,6 +19,7 @@
 
 .hero {
   position: relative;
+  max-width: 100%;
 
   .base,
   .framework,
@@ -158,6 +159,16 @@
   border-top: 1px solid var(--border);
   @media (max-width: 1024px) {
     height: 48px;
+  }
+}
+
+/*
+  Touch targets: the template's nav links were ~30px tall, below the 44px
+  minimum that makes a link reliably tappable on a phone.
+*/
+@media (max-width: 1024px) {
+  #next-steps ul a {
+    min-height: 44px;
   }
 }
 

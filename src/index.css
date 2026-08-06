@@ -1,111 +1,112 @@
+@import "tailwindcss";
+
+/*
+  EZMoov design tokens, exposed to Tailwind v4 via @theme.
+  These generate real utilities: bg-ink-950, border-line, text-brand-500, etc.
+*/
+@theme {
+  --color-ink-950: #0b0e14;
+  --color-ink-900: #0f141c;
+  --color-ink-850: #121923;
+  --color-ink-800: #131821;
+  --color-ink-700: #151d28;
+  --color-line: #1e293b;
+
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #22c55e;
+  --color-brand-500: #10b981;
+  --color-brand-700: #15803d;
+  --color-brand-950: #0d271f;
+
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/*
+  The app is dark-only. The Vite template shipped a light palette with a
+  prefers-color-scheme override, which meant a light-mode OS rendered pale
+  text on the app's dark background. Dark is now the single source of truth.
+*/
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --bg: #0b0e14;
+  --border: #1e293b;
+  --code-bg: #1f2028;
+  --accent: #10b981;
+  --accent-bg: rgba(16, 185, 129, 0.15);
+  --accent-border: rgba(16, 185, 129, 0.5);
+  --social-bg: rgba(30, 41, 59, 0.5);
+  --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+html {
+  /* Stops iOS Safari inflating text in landscape. */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  background-color: var(--bg);
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  /* Never let a wide table push the whole page sideways on a phone. */
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 h1,
 h2 {
-  font-family: var(--heading);
-  font-weight: 500;
   color: var(--text-h);
+  font-weight: 600;
+  margin: 0;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
 p {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
+code {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.875em;
   border-radius: 4px;
+  padding: 2px 6px;
+  background: var(--code-bg);
   color: var(--text-h);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* Give every interactive element a visible, consistent focus ring. */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
