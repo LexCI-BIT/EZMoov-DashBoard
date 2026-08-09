@@ -1,30 +1,67 @@
-interface ProfileProps {
-  onLogout: () => void;
-}
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaUserCircle, FaSignOutAlt, FaPhoneAlt, FaIdBadge } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
-export default function Profile({ onLogout }: ProfileProps) {
+const Profile: React.FC = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Signed out successfully');
+    navigate('/login');
+  };
+
   return (
-    <div className="flex flex-col flex-1 animate-fade-in w-full max-w-7xl mx-auto px-6 py-6 pb-20">
-      <div className="pb-4 border-b border-[#E0E0E0] mb-8">
-        <h1 className="text-2xl font-bold text-[#1A1A1A]">Profile</h1>
-      </div>
-
-      <div className="max-w-md mx-auto w-full bg-white border border-[#E0E0E0] rounded-2xl p-8 shadow-sm text-center">
-        <div className="flex flex-col items-center py-6">
-          <div className="w-[80px] h-[80px] bg-[#E6F6EE] text-[#00B14F] rounded-full flex items-center justify-center text-3xl font-bold mb-4 shadow-sm">
-            JD
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-12">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Profile Header */}
+          <div className="bg-green-600 p-8 text-center">
+            <FaUserCircle className="text-6xl text-white mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-white">{user?.fullName || 'Guest User'}</h1>
           </div>
-          <div className="text-xl font-bold text-[#1A1A1A] mb-1">John Doe</div>
-          <div className="text-sm text-[#666666] font-medium">+1 234 567 8900</div>
-        </div>
 
-        <button 
-          onClick={onLogout}
-          className="w-full mt-6 py-4 text-[#D32F2F] bg-[#FFEBEE] hover:bg-[#FFCDD2] border-none text-sm font-bold uppercase tracking-wide rounded-xl cursor-pointer transition-colors"
-        >
-          Log Out
-        </button>
+          {/* Profile Details */}
+          <div className="p-8 space-y-6">
+            <h2 className="text-xl font-semibold text-gray-900 border-b pb-4">Account Information</h2>
+            
+            <div className="flex items-center gap-4">
+              <div className="bg-green-50 p-4 rounded-full">
+                <FaIdBadge className="text-green-600 text-xl" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">User ID</p>
+                <p className="text-lg text-gray-900 font-medium">{user?.id || 'N/A'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="bg-green-50 p-4 rounded-full">
+                <FaPhoneAlt className="text-green-600 text-xl" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Phone Number</p>
+                <p className="text-lg text-gray-900 font-medium">{user?.phone || 'N/A'}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-6 border-t mt-8">
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 py-3 px-4 rounded-md font-medium transition-colors"
+              >
+                <FaSignOutAlt /> Logout
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Profile;
