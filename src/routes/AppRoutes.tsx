@@ -9,6 +9,9 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import ForgotPassword from '../pages/ForgotPassword';
 
+// ... existing imports (Home, Services, Bookings, etc.)
+import { AdminLayout } from '../components/admin/AdminLayout'; // Import your Admin Layout
+
 import StandardParcelDelivery from '../pages/services/StandardParcelDelivery';
 import OutstationBidding from '../pages/services/OutstationBidding';
 import ShiftingExperts from '../pages/services/ShiftingExperts';
@@ -29,6 +32,8 @@ import { BookingProvider } from '../context/BookingContext';
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
+        {/* ADMIN ROUTE - Renders standalone because of the App.tsx conditional logic */}
+      <Route path="/admin/*" element={<AdminLayout />} />
       {/* PUBLIC HOMEPAGE */}
       <Route path="/" element={<Home />} />
       
