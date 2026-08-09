@@ -38,7 +38,7 @@ const RiderAllocation: React.FC = () => {
   }, []); // Run only once on mount
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
       <div className="relative mb-8">
         <FaMapMarkerAlt className="text-green-600 text-6xl" />
         <FaSpinner className="animate-spin text-green-500 text-2xl absolute -bottom-2 -right-2 bg-white rounded-full p-1 border-2 border-green-500" />

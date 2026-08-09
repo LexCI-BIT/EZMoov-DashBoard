@@ -44,9 +44,19 @@ export interface BookingPayload {
 }
 
 export type ActiveInput = 'pickup' | 'drop' | null;
-// export type BookingStatus = 'idle' | 'selecting_vehicle' | 'viewing_fare' | 'searching_driver' | 'driver_assigned';
 
-// Add these to your existing types/booking.ts file
+/**
+ * Where the user is in the live booking wizard. Distinct from BookingStatus,
+ * which describes a booking that already exists in history.
+ */
+export type BookingFlowStatus =
+  | 'idle'
+  | 'selecting_vehicle'
+  | 'viewing_fare'
+  | 'searching_driver'
+  | 'driver_assigned';
+
+/** Lifecycle state of a saved booking. */
 export type BookingStatus = 'active' | 'completed';
 
 export interface Booking {
@@ -63,24 +73,8 @@ export interface Booking {
     vehicleNumber: string;
   };
   createdAt: string;
-}
-// Add these two optional fields to your existing Booking interface
-export interface Booking {
-  id: string;
-  status: BookingStatus;
-  pickup: LocationInfo;
-  drop: LocationInfo;
-  recipient: RecipientInfo;
-  vehicle: Vehicle;
-  fare: FareBreakdown;
-  driverDetails: {
-    driverName: string;
-    driverPhone: string;
-    vehicleNumber: string;
-  };
-  createdAt: string;
-  
-  // NEW: Optional fields for Shifting Experts Survey
+
+  // Optional fields for the Shifting Experts survey
   surveyDate?: string;
   surveyTime?: string;
 }

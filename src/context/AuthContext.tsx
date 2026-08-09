@@ -85,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { data: null, error: { message: 'Failed to send reset OTP.' } };
   };
 
-  const updatePassword = async (phone: string, token: string, newPassword: string): Promise<AuthResponse> => {
+  const updatePassword = async (_phone: string, token: string, newPassword: string): Promise<AuthResponse> => {
     await mockNetworkDelay();
     if (token === '123456' && newPassword.length >= 6) {
       return { data: { user: null }, error: null };

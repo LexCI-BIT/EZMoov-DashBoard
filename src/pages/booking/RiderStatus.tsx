@@ -12,7 +12,7 @@ const RiderStatus: React.FC = () => {
 
   if (!driverDetails) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
+      <div className="min-h-[calc(100dvh-4rem)] flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
         <p className="text-gray-600 mb-4">Session expired or booking already completed.</p>
         <button onClick={() => navigate('/')} className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium">Go Home</button>
       </div>
@@ -44,7 +44,7 @@ const RiderStatus: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-8 text-center">
         <FaCheckCircle className="text-green-600 text-7xl mx-auto mb-6" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Driver Allocated!</h2>

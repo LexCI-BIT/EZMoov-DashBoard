@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaMapMarkerAlt, FaUser, FaPhone, FaTruck, FaSpinner, FaPhoneAlt, FaCheck, FaTimes, FaGavel } from 'react-icons/fa';
+import { FaArrowLeft, FaMapMarkerAlt, FaUser, FaTruck, FaSpinner, FaPhoneAlt, FaCheck, FaTimes, FaGavel } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useBookingsHistory } from '../../context/BookingsContext';
 import { mockVehicles, findOutstationBid } from '../../services/apiService';
@@ -93,9 +93,9 @@ const OutstationBidding: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-0 z-10">
+      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-16 z-10">
         <FaArrowLeft 
           className="text-gray-800 cursor-pointer mr-4 text-xl" 
           onClick={() => step === 'bidding' ? setStep('details') : navigate('/services')} 

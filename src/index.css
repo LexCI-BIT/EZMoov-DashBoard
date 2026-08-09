@@ -1,10 +1,85 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+  Tailwind v4 — CSS-first config.
+
+  Do NOT re-add `@tailwind base/components/utilities`; those are v3 directives.
+  v4 uses this single import, and mixing the two forms breaks the build.
+
+  Theme values live in `@theme` below, not in tailwind.config.js. That file is
+  a v3 artifact and is ignored unless explicitly loaded with `@config`.
+*/
 @import "tailwindcss";
 
+@theme {
+  /* Admin panel surfaces (dark) */
+  --color-ink-950: #0b0e14;
+  --color-ink-900: #0f141c;
+  --color-ink-850: #121923;
+  --color-ink-800: #131821;
+  --color-ink-700: #151d28;
+  --color-line: #1e293b;
+
+  /* EZMoov green — shared by the customer app and the admin accent */
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #22c55e;
+  --color-brand-500: #10b981;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+  --color-brand-950: #0d271f;
+
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
 @layer base {
+  html {
+    /* Stops iOS Safari inflating text when the device rotates. */
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-white text-gray-900 font-sans antialiased;
+    margin: 0;
+    /* dvh accounts for mobile browser chrome; vh does not. */
+    min-height: 100dvh;
+    /* A wide table must never push the whole page sideways on a phone. */
+    overflow-x: hidden;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100dvh;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /* Consistent, visible keyboard focus everywhere. */
+  :where(a, button, input, select, textarea):focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Inputs below 16px make iOS Safari zoom on focus and shift the layout. */
+  @media (max-width: 640px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+}
+
+/* Respect users who ask for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

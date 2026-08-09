@@ -16,7 +16,7 @@ const StandardParcelDelivery: React.FC = () => {
     recipient.phone.length >= 10;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col">
       {/* Header */}
       <header className="bg-white p-4 shadow-sm flex items-center z-10 border-b">
         <FaArrowLeft className="text-gray-800 cursor-pointer mr-4 text-xl" onClick={() => navigate('/services')} />

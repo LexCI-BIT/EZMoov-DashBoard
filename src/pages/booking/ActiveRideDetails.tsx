@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaUser, FaPhone, FaTruck, FaCircle, FaSpinner } from 'react-icons/fa';
+import { FaArrowLeft, FaUser, FaTruck, FaCircle, FaSpinner } from 'react-icons/fa';
 import { useBookingsHistory } from '../../context/BookingsContext';
 import { checkRideStatus } from '../../services/apiService'; // New import
 
@@ -44,7 +44,7 @@ const ActiveRideDetails: React.FC = () => {
 
   if (!booking || booking.status !== 'active') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
+      <div className="min-h-[calc(100dvh-4rem)] flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
         <p className="text-gray-600 mb-4">Active booking not found or ride already completed.</p>
         <button onClick={() => navigate('/bookings')} className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium">Back to Bookings</button>
       </div>
@@ -52,8 +52,8 @@ const ActiveRideDetails: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-0 z-10">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col">
+      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-16 z-10">
         <FaArrowLeft className="text-gray-800 cursor-pointer mr-4 text-xl" onClick={() => navigate('/bookings')} />
         <h1 className="text-lg font-semibold text-gray-900">Active Ride Details</h1>
         <span className="ml-auto flex items-center gap-2 text-green-600 font-bold text-sm bg-green-50 px-3 py-1 rounded-full">

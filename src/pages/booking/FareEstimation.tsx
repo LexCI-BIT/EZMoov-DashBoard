@@ -36,7 +36,7 @@ const FareEstimation: React.FC = () => {
 
   if (loadingFare || !fare || !selectedVehicle) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-500">
+      <div className="min-h-[calc(100dvh-4rem)] flex flex-col items-center justify-center bg-gray-50 text-gray-500">
         <FaSpinner className="animate-spin text-green-600 text-3xl mb-3" />
         <p>Calculating fare...</p>
       </div>
@@ -44,8 +44,8 @@ const FareEstimation: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-0 z-10">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col">
+      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-16 z-10">
         <FaArrowLeft className="text-gray-800 cursor-pointer mr-4 text-xl" onClick={() => navigate(-1)} />
         <h1 className="text-lg font-semibold text-gray-900">Fare Estimation</h1>
       </header>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBox, FaGavel, FaTruckMoving, FaLocationArrow, FaCheckCircle, FaSpinner } from 'react-icons/fa';
+import { FaBox, FaGavel, FaTruckMoving, FaLocationArrow, FaSpinner } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { getServices } from '../services/serviceService';
 import type { Service } from '../types/service';

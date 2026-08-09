@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaMapMarkerAlt, FaUser, FaPhone, FaCalendarAlt, FaClock, FaSpinner, FaCheckCircle, FaTruckMoving } from 'react-icons/fa';
+import { FaArrowLeft, FaMapMarkerAlt, FaUser, FaCalendarAlt, FaSpinner, FaCheckCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useBookingsHistory } from '../../context/BookingsContext';
 import { bookSurveySlot } from '../../services/apiService';
@@ -68,7 +68,7 @@ const ShiftingExperts: React.FC = () => {
   // SUCCESS VIEW
   if (confirmedSurveyor) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+      <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col items-center justify-center p-6">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-8 text-center">
           <FaCheckCircle className="text-green-600 text-7xl mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Survey Scheduled!</h2>
@@ -106,8 +106,8 @@ const ShiftingExperts: React.FC = () => {
 
   // FORM VIEW
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-0 z-10">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col">
+      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-16 z-10">
         <FaArrowLeft className="text-gray-800 cursor-pointer mr-4 text-xl" onClick={() => navigate('/services')} />
         <h1 className="text-lg font-semibold text-gray-900">Shifting Experts</h1>
       </header>

@@ -53,8 +53,8 @@ const VehicleSelection: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-0 z-10">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col">
+      <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-16 z-10">
         <FaArrowLeft className="text-gray-800 cursor-pointer mr-4 text-xl" onClick={() => navigate(-1)} />
         <h1 className="text-lg font-semibold text-gray-900">Select Vehicle</h1>
       </header>

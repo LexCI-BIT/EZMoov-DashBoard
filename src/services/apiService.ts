@@ -57,7 +57,7 @@ export const calculateFare = async (vehicle: Vehicle, distanceInKm: number): Pro
 };
 
 // Mock Booking Confirmation & Driver Allocation
-export const confirmBooking = async (payload: BookingPayload): Promise<{ driverName: string; driverPhone: string; vehicleNumber: string }> => {
+export const confirmBooking = async (_payload: BookingPayload): Promise<{ driverName: string; driverPhone: string; vehicleNumber: string }> => {
   await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate finding driver
   return {
     driverName: 'Rajesh Kumar',
@@ -69,7 +69,7 @@ export const confirmBooking = async (payload: BookingPayload): Promise<{ driverN
 // ... existing apiService code ...
 
 // Add this new function to simulate the driver updating the status
-export const checkRideStatus = async (bookingId: string): Promise<'active' | 'completed'> => {
+export const checkRideStatus = async (_bookingId: string): Promise<'active' | 'completed'> => {
   await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate network request
   
   // Mock logic: 20% chance the driver has completed the ride every time we check
@@ -79,7 +79,7 @@ export const checkRideStatus = async (bookingId: string): Promise<'active' | 'co
 // ... existing apiService code ...
 
 // Add this new function to simulate Outstation Bidding API
-export const findOutstationBid = async (vehicleId: string): Promise<{
+export const findOutstationBid = async (_vehicleId: string): Promise<{
   driverName: string;
   driverPhone: string;
   vehicleNumber: string;
@@ -101,7 +101,7 @@ export const findOutstationBid = async (vehicleId: string): Promise<{
 // ... existing apiService code ...
 
 // Add this new function to simulate allocating a Survey Representative
-export const bookSurveySlot = async (slotData: { date: string; time: string; address: string }): Promise<{
+export const bookSurveySlot = async (_slotData: { date: string; time: string; address: string }): Promise<{
   driverName: string;
   driverPhone: string;
   vehicleNumber: string;

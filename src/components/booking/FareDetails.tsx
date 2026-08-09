@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaSpinner, FaCheckCircle, FaUser, FaPhone } from 'react-icons/fa';
+import { FaTimes, FaSpinner } from 'react-icons/fa';
 import { useBooking } from '../../context/BookingContext';
 import { calculateFare, confirmBooking } from '../../services/apiService';
 import type { BookingPayload } from '../../types/booking';
 
 const FareDetails: React.FC = () => {
-  const { pickup, drop, recipient, selectedVehicle, fare, setFare, setStatus, setDriverDetails, resetBooking } = useBooking();
+  const { pickup, drop, recipient, selectedVehicle, fare, setFare, setStatus, setDriverDetails } = useBooking();
   const [loadingFare, setLoadingFare] = useState(true);
   const [isConfirming, setIsConfirming] = useState(false);
 
