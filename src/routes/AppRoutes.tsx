@@ -14,25 +14,25 @@ import { BookingProvider } from '../context/BookingContext';
   macOS are case-insensitive so a mismatch works locally, but a Linux CI build
   fails with "module not found". Keep these capitalised.
 */
-const Home = lazy(() => import('../Pages/Home'));
-const Services = lazy(() => import('../Pages/Services'));
-const Bookings = lazy(() => import('../Pages/Bookings'));
-const Profile = lazy(() => import('../Pages/Profile'));
-const Login = lazy(() => import('../Pages/Login'));
-const Register = lazy(() => import('../Pages/Register'));
-const ForgotPassword = lazy(() => import('../Pages/ForgotPassword'));
+const Home = lazy(() => import('../pages/Home'));
+const Services = lazy(() => import('../pages/Services'));
+const Bookings = lazy(() => import('../pages/Bookings'));
+const Profile = lazy(() => import('../pages/Profile'));
+const Login = lazy(() => import('../pages/Login'));
+const Register = lazy(() => import('../pages/Register'));
+const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
 
-const StandardParcelDelivery = lazy(() => import('../Pages/services/StandardParcelDelivery'));
-const OutstationBidding = lazy(() => import('../Pages/services/OutstationBidding'));
-const ShiftingExperts = lazy(() => import('../Pages/services/ShiftingExperts'));
-const LocalAdda = lazy(() => import('../Pages/services/LocalAdda'));
+const StandardParcelDelivery = lazy(() => import('../pages/services/StandardParcelDelivery'));
+const OutstationBidding = lazy(() => import('../pages/services/OutstationBidding'));
+const ShiftingExperts = lazy(() => import('../pages/services/ShiftingExperts'));
+const LocalAdda = lazy(() => import('../pages/services/LocalAdda'));
 
-const VehicleSelection = lazy(() => import('../Pages/booking/VehicleSelection'));
-const FareEstimation = lazy(() => import('../Pages/booking/FareEstimation'));
-const RiderAllocation = lazy(() => import('../Pages/booking/RiderAllocation'));
-const RiderStatus = lazy(() => import('../Pages/booking/RiderStatus'));
-const ActiveRideDetails = lazy(() => import('../Pages/booking/ActiveRideDetails'));
-const CompletedRideDetails = lazy(() => import('../Pages/booking/CompletedRideDetails'));
+const VehicleSelection = lazy(() => import('../pages/booking/VehicleSelection'));
+const FareEstimation = lazy(() => import('../pages/booking/FareEstimation'));
+const RiderAllocation = lazy(() => import('../pages/booking/RiderAllocation'));
+const RiderStatus = lazy(() => import('../pages/booking/RiderStatus'));
+const ActiveRideDetails = lazy(() => import('../pages/booking/ActiveRideDetails'));
+const CompletedRideDetails = lazy(() => import('../pages/booking/CompletedRideDetails'));
 
 // AdminLayout is a named export, so map it onto the default `lazy()` expects.
 const AdminLayout = lazy(() =>
