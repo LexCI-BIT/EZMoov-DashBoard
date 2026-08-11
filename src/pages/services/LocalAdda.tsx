@@ -1,10 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaMapMarkerAlt, FaUser, FaPhone, FaLocationArrow, FaArrowRight } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import { useBooking } from '../../context/BookingContext';
+import { useAuth } from '../../context/AuthContext';
 
 const LocalAdda: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { pickup, drop, recipient, setPickup, setDrop, setRecipient } = useBooking();
 
   const isFormValid = 
@@ -13,11 +16,19 @@ const LocalAdda: React.FC = () => {
     recipient.name.length > 2 && 
     recipient.phone.length >= 10;
 
-  // Helper to handle manual text input since we aren't using the Map here
   const handleLocationChange = (type: 'pickup' | 'drop', address: string) => {
     const mockCoords = { lat: 28.6139 + Math.random(), lng: 77.2090 + Math.random() };
     if (type === 'pickup') setPickup({ address, coordinates: mockCoords });
     if (type === 'drop') setDrop({ address, coordinates: mockCoords });
+  };
+
+  const handleProceed = () => {
+    if (!user) {
+      toast.info('Please log in to continue.');
+      navigate('/login');
+      return;
+    }
+    navigate('/booking/vehicle-selection');
   };
 
   return (
@@ -28,8 +39,6 @@ const LocalAdda: React.FC = () => {
       </header>
 
       <div className="flex-grow p-6 max-w-md mx-auto w-full flex flex-col">
-        
-        {/* Info Banner */}
         <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg flex items-start gap-3 mb-6">
           <FaLocationArrow className="text-green-600 text-xl mt-1" />
           <div>
@@ -91,11 +100,11 @@ const LocalAdda: React.FC = () => {
         </div>
 
         <button 
-          onClick={() => navigate('/booking/vehicle-selection')}
+          onClick={handleProceed}
           disabled={!isFormValid}
           className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-500 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-6"
         >
-          Select Vehicle <FaArrowRight />
+          Confirm & Select Vehicle <FaArrowRight />
         </button>
       </div>
     </div>

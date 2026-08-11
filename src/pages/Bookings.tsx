@@ -1,11 +1,26 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import { useBookingsHistory } from '../context/BookingsContext';
+import { useAuth } from '../context/AuthContext';
 
 const Bookings: React.FC = () => {
   const { bookings } = useBookingsHistory();
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  // If accessed directly via URL without auth
+  if (!user) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-12 flex flex-col items-center justify-center text-center">
+        <h1 className="text-4xl font-extrabold text-gray-900">Your Bookings</h1>
+        <p className="mt-4 text-lg text-gray-600">Please log in to view your active and completed trips.</p>
+        <Link to="/login" className="mt-8 bg-green-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-green-500 transition-colors">
+          Log In
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-12">
@@ -28,7 +43,6 @@ const Bookings: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-xl font-semibold text-gray-900">{booking.vehicle.name}</h3>
-                    {/* Status Badge */}
                     <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                       booking.status === 'active' 
                         ? 'bg-green-100 text-green-700 animate-pulse' 

@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaSpinner } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import { useBooking } from '../../context/BookingContext';
+import { useAuth } from '../../context/AuthContext';
 import { calculateFare } from '../../services/apiService';
 
 const FareEstimation: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { pickup, drop, recipient, selectedVehicle, fare, setFare } = useBooking();
   const [loadingFare, setLoadingFare] = useState(!fare);
 
   useEffect(() => {
-    // Safety redirect
     if (!selectedVehicle || !pickup.address) {
       navigate('/services/standard-parcel-delivery');
       return;
@@ -19,9 +21,7 @@ const FareEstimation: React.FC = () => {
     const getFare = async () => {
       if (!fare) {
         setLoadingFare(true);
-        // Re-fetch distance implicitly by calculating fare again (mocked)
-        // In a real app, you'd pass the actual distance calculated prior
-        const distance = 10; // Mocked distance continuation
+        const distance = 10; // Mocked
         const calculatedFare = await calculateFare(selectedVehicle, distance);
         setFare(calculatedFare);
         setLoadingFare(false);
@@ -31,6 +31,16 @@ const FareEstimation: React.FC = () => {
   }, [selectedVehicle, pickup, fare, setFare, navigate]);
 
   const handleConfirmBooking = () => {
+    if (!user) {
+      toast.info('Please log in to confirm your booking.');
+      navigate('/login');
+      return;
+    }
+    
+    // Post-Auth Data Management: Ensure user ID is tied to the session/booking
+    // This assumes the backend handles user association via JWT token when creating the booking.
+    // If local context needs it, you'd update it here: setFare({...fare, userId: user.uid});
+    
     navigate('/booking/rider-allocation');
   };
 
@@ -51,7 +61,6 @@ const FareEstimation: React.FC = () => {
       </header>
 
       <div className="flex-grow p-4 space-y-6 max-w-md mx-auto w-full">
-        {/* Route Summary */}
         <div className="bg-green-50 p-4 rounded-lg space-y-2 border border-green-100">
           <div className="flex gap-3">
             <div className="flex flex-col items-center pt-1">
@@ -70,7 +79,6 @@ const FareEstimation: React.FC = () => {
           </div>
         </div>
 
-        {/* Fare Breakdown */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-3 text-sm">
           <div className="flex justify-between text-gray-600">
             <span>Base Fare</span>

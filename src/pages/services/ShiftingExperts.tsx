@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaMapMarkerAlt, FaUser, FaCalendarAlt, FaSpinner, FaCheckCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 import { useBookingsHistory } from '../../context/BookingsContext';
 import { bookSurveySlot } from '../../services/apiService';
 import type { Booking, Vehicle } from '../../types/booking';
 
 const ShiftingExperts: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { addBooking } = useBookingsHistory();
 
-  // Form State
   const [pickupAddress, setPickupAddress] = useState('');
   const [dropAddress, setDropAddress] = useState('');
   const [recipientName, setRecipientName] = useState('');
@@ -18,11 +19,9 @@ const ShiftingExperts: React.FC = () => {
   const [surveyDate, setSurveyDate] = useState('');
   const [surveyTime, setSurveyTime] = useState('');
   
-  // UI State
   const [loading, setLoading] = useState(false);
   const [confirmedSurveyor, setConfirmedSurveyor] = useState<{ driverName: string; driverPhone: string; vehicleNumber: string } | null>(null);
 
-  // A dummy vehicle object to satisfy the standard Booking type structure
   const surveyVehicle: Vehicle = {
     id: 'survey',
     name: 'Pre-Move Survey',
@@ -39,33 +38,36 @@ const ShiftingExperts: React.FC = () => {
       return;
     }
 
+    if (!user) {
+      toast.info('Please log in to book a survey slot.');
+      navigate('/login');
+      return;
+    }
+
     setLoading(true);
     
-    // 1. Call mock API to allocate surveyor
     const surveyor = await bookSurveySlot({ date: surveyDate, time: surveyTime, address: pickupAddress });
     
-    // 2. Construct the booking object
     const newBooking: Booking = {
       id: `bk_survey_${Date.now()}`,
       status: 'active',
+      // userId: user.uid, // Post-Auth Data Management
       pickup: { address: pickupAddress, coordinates: null },
       drop: { address: dropAddress, coordinates: null },
       recipient: { name: recipientName, phone: recipientPhone },
       vehicle: surveyVehicle,
-      fare: { baseFare: 0, distanceCharge: 0, taxes: 0, total: 0, distanceInKm: 0 }, // Survey is free
+      fare: { baseFare: 0, distanceCharge: 0, taxes: 0, total: 0, distanceInKm: 0 },
       driverDetails: surveyor,
       createdAt: new Date().toISOString(),
       surveyDate: surveyDate,
       surveyTime: surveyTime
     };
 
-    // 3. Save to global bookings state
     addBooking(newBooking);
     setConfirmedSurveyor(surveyor);
     setLoading(false);
   };
 
-  // SUCCESS VIEW
   if (confirmedSurveyor) {
     return (
       <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col items-center justify-center p-6">
@@ -104,7 +106,6 @@ const ShiftingExperts: React.FC = () => {
     );
   }
 
-  // FORM VIEW
   return (
     <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col">
       <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-16 z-10">
@@ -113,8 +114,6 @@ const ShiftingExperts: React.FC = () => {
       </header>
 
       <div className="flex-grow p-4 max-w-md mx-auto w-full space-y-4 pb-8">
-        
-        {/* Survey Slot Details */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
           <h2 className="font-semibold text-gray-900 flex items-center gap-2"><FaCalendarAlt className="text-green-600" /> Schedule Pre-Move Survey</h2>
           
@@ -138,7 +137,6 @@ const ShiftingExperts: React.FC = () => {
           </div>
         </div>
 
-        {/* Location Details */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
           <h2 className="font-semibold text-gray-900 flex items-center gap-2"><FaMapMarkerAlt className="text-green-600" /> Location Details</h2>
           <input 
@@ -153,7 +151,6 @@ const ShiftingExperts: React.FC = () => {
           />
         </div>
 
-        {/* Contact Details */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
           <h2 className="font-semibold text-gray-900 flex items-center gap-2"><FaUser className="text-green-600" /> Contact Details</h2>
           <input 

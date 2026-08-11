@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaMapMarkerAlt, FaUser, FaTruck, FaSpinner, FaPhoneAlt, FaCheck, FaTimes, FaGavel } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 import { useBookingsHistory } from '../../context/BookingsContext';
 import { mockVehicles, findOutstationBid } from '../../services/apiService';
 import type { Booking, Vehicle } from '../../types/booking';
@@ -17,9 +18,9 @@ interface BidData {
 
 const OutstationBidding: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { addBooking } = useBookingsHistory();
 
-  // Form State
   const [step, setStep] = useState<Step>('details');
   const [pickup, setPickup] = useState('');
   const [drop, setDrop] = useState('');
@@ -27,7 +28,6 @@ const OutstationBidding: React.FC = () => {
   const [recipientPhone, setRecipientPhone] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
-  // Bidding State
   const [isSearching, setIsSearching] = useState(false);
   const [currentBid, setCurrentBid] = useState<BidData | null>(null);
   const [confirmedBid, setConfirmedBid] = useState<BidData | null>(null);
@@ -37,6 +37,13 @@ const OutstationBidding: React.FC = () => {
       toast.error('Please fill all details and select a vehicle');
       return;
     }
+
+    if (!user) {
+      toast.info('Please log in to start bidding.');
+      navigate('/login');
+      return;
+    }
+
     setStep('bidding');
     await searchNextBid();
   };
@@ -44,7 +51,6 @@ const OutstationBidding: React.FC = () => {
   const searchNextBid = async () => {
     setIsSearching(true);
     setCurrentBid(null);
-    // Call mock API to get a new bid
     const bid = await findOutstationBid(selectedVehicle!.id);
     setCurrentBid(bid);
     setIsSearching(false);
@@ -60,23 +66,22 @@ const OutstationBidding: React.FC = () => {
   };
 
   const handleAcceptBid = () => {
-    if (!currentBid || !selectedVehicle) return;
+    if (!currentBid || !selectedVehicle || !user) return;
 
-    // 1. Construct the booking object using the accepted bid amount
     const newBooking: Booking = {
       id: `bk_outstation_${Date.now()}`,
       status: 'active',
+      // userId: user.uid, // Post-Auth Data Management
       pickup: { address: pickup, coordinates: null },
       drop: { address: drop, coordinates: null },
       recipient: { name: recipientName, phone: recipientPhone },
       vehicle: selectedVehicle,
-      // Map the bid amount to the fare structure
       fare: {
         baseFare: 0,
         distanceCharge: currentBid.bidAmount,
         taxes: 0,
         total: currentBid.bidAmount,
-        distanceInKm: 0 // Negligible for bidding
+        distanceInKm: 0
       },
       driverDetails: {
         driverName: currentBid.driverName,
@@ -86,7 +91,6 @@ const OutstationBidding: React.FC = () => {
       createdAt: new Date().toISOString()
     };
 
-    // 2. Save to global bookings state
     addBooking(newBooking);
     setConfirmedBid(currentBid);
     setStep('success');
@@ -94,7 +98,6 @@ const OutstationBidding: React.FC = () => {
 
   return (
     <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 flex flex-col">
-      {/* Header */}
       <header className="bg-white p-4 shadow-sm flex items-center border-b sticky top-16 z-10">
         <FaArrowLeft 
           className="text-gray-800 cursor-pointer mr-4 text-xl" 
@@ -104,8 +107,6 @@ const OutstationBidding: React.FC = () => {
       </header>
 
       <div className="flex-grow p-4 max-w-md mx-auto w-full">
-        
-        {/* STEP 1: Details Form */}
         {step === 'details' && (
           <div className="space-y-4">
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
@@ -139,7 +140,7 @@ const OutstationBidding: React.FC = () => {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
               <h2 className="font-semibold text-gray-900 flex items-center gap-2"><FaTruck className="text-green-600" /> Select Vehicle</h2>
               <div className="grid grid-cols-2 gap-3">
-                {mockVehicles.slice(2).map((v) => ( // Showing larger vehicles for outstation
+                {mockVehicles.slice(2).map((v) => (
                   <button 
                     key={v.id} 
                     onClick={() => setSelectedVehicle(v)}
@@ -161,7 +162,6 @@ const OutstationBidding: React.FC = () => {
           </div>
         )}
 
-        {/* STEP 2: Bidding Process */}
         {step === 'bidding' && (
           <div className="space-y-6 mt-4">
             <div className="text-center">
@@ -223,7 +223,6 @@ const OutstationBidding: React.FC = () => {
           </div>
         )}
 
-        {/* STEP 3: Success / Ride Confirmed */}
         {step === 'success' && confirmedBid && (
           <div className="flex flex-col items-center justify-center text-center mt-10">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-8">
