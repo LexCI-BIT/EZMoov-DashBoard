@@ -1,111 +1,172 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaArrowLeft, FaEnvelope, FaLock, FaSpinner } from 'react-icons/fa';
+import { FaArrowLeft, FaSpinner, FaShieldAlt } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import { OtpInput } from '../components/auth/OtpInput';
+import { PhoneField } from '../components/auth/PhoneField';
+import { formatPhone, isValidPhone } from '../lib/phone';
+
+const RESEND_SECONDS = 60;
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  // const { login } = useAuth(); // assuming your context exposes a login function
-  
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { sendLoginOtp, verifyOtp } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('91');
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) return;
+    const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [secondsLeft]);
+
+  const phoneValid = isValidPhone(phone, countryCode);
+
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!phoneValid || loading) return;
+
     setLoading(true);
-    try {
-      // Replace with your actual login logic
-      // await login(email, password);
-      toast.success('Logged in successfully!');
-      navigate('/'); // Redirect to home or previous page after login
-    } catch (error) {
-      toast.error('Failed to login. Check your credentials.');
-    } finally {
-      setLoading(false);
+    const { error } = await sendLoginOtp(phone);
+    setLoading(false);
+
+    if (error) {
+      // sendLoginOtp uses shouldCreateUser:false, so an unknown number
+      // errors here rather than quietly creating an account.
+      toast.error(error.message);
+      return;
     }
+    setStep('otp');
+    setSecondsLeft(RESEND_SECONDS);
+    toast.success('Verification code sent');
+  };
+
+  const handleVerify = async (code?: string) => {
+    const token = (code ?? otp).trim();
+    if (token.length !== 6 || loading) return;
+
+    setLoading(true);
+    const { error } = await verifyOtp(phone, token);
+    setLoading(false);
+
+    if (error) {
+      toast.error(error.message);
+      setOtp('');
+      return;
+    }
+    toast.success('Welcome back');
+    navigate('/', { replace: true });
+  };
+
+  const handleResend = async () => {
+    if (secondsLeft > 0 || loading) return;
+    setLoading(true);
+    const { error } = await sendLoginOtp(phone);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setSecondsLeft(RESEND_SECONDS);
+    setOtp('');
+    toast.success('New code sent');
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
-      
-      {/* Back Arrow Button */}
-      <button 
-        onClick={() => navigate(-1)} 
-        className="absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors p-2 rounded-lg hover:bg-gray-100"
+    <div className="min-h-[calc(100dvh-4rem)] bg-gray-50 px-4 py-6 sm:px-6">
+      <button
+        onClick={() => (step === 'otp' ? setStep('phone') : navigate(-1))}
+        aria-label="Go back"
+        className="mb-4 flex size-10 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100"
       >
-        <FaArrowLeft className="text-xl" />
+        <FaArrowLeft className="text-lg" />
       </button>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
-      </div>
+      <div className="mx-auto w-full max-w-md">
+        {step === 'phone' ? (
+          <>
+            <h1 className="text-2xl font-bold text-gray-900">Let&apos;s get started</h1>
+            <p className="mt-1 text-sm font-medium text-green-600">
+              Sign in with a valid phone number to continue to EZMoov
+            </p>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            
-            {/* Email Input */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
+            <form onSubmit={handleSendOtp} className="mt-6 space-y-4">
+              <PhoneField
+                value={phone}
+                onChange={setPhone}
+                countryCode={countryCode}
+                onCountryChange={setCountryCode}
+                disabled={loading}
+                autoFocus
+                placeholder="77401-51613"
+              />
 
-            {/* Password Input */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  placeholder="********"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div>
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400"
+                disabled={!phoneValid || loading}
+                className="flex h-12 w-full items-center justify-center rounded-lg bg-green-600 text-base font-semibold text-white transition-colors hover:bg-green-500 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
-                {loading ? <FaSpinner className="animate-spin" /> : 'Sign In'}
+                {loading ? <FaSpinner className="animate-spin" /> : 'Continue'}
               </button>
-            </div>
-          </form>
+            </form>
 
-          <div className="mt-6 text-center text-sm">
-            <Link to="/register" className="font-medium text-green-600 hover:text-green-500">
-              Don't have an account? Sign up
-            </Link>
+            <p className="mt-5 text-center text-xs leading-relaxed text-gray-500">
+              By continuing, you agree to our{' '}
+              <span className="font-semibold text-gray-700">TERMS &amp; CONDITIONS</span> and{' '}
+              <span className="font-semibold text-gray-700">PRIVACY POLICY</span>
+            </p>
+
+            <p className="mt-6 text-center text-sm text-gray-600">
+              Don&apos;t have an account?{' '}
+              <Link to="/register" className="font-semibold text-green-600">
+                Sign Up
+              </Link>
+            </p>
+          </>
+        ) : (
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-green-50">
+              <FaShieldAlt className="text-xl text-green-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Otp Verification</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Enter the 6-digit code sent to
+              <br />
+              <span className="font-semibold text-gray-900">{formatPhone(phone, countryCode)}</span>
+            </p>
+
+            <div className="mt-6">
+              <OtpInput value={otp} onChange={setOtp} onComplete={handleVerify} disabled={loading} />
+            </div>
+
+            <button
+              onClick={() => handleVerify()}
+              disabled={otp.length !== 6 || loading}
+              className="mt-6 flex h-12 w-full items-center justify-center rounded-lg bg-green-600 text-base font-semibold text-white transition-colors hover:bg-green-500 disabled:cursor-not-allowed disabled:bg-gray-300"
+            >
+              {loading ? <FaSpinner className="animate-spin" /> : 'Verify & Proceed'}
+            </button>
+
+            <p className="mt-4 text-sm text-gray-600">
+              Didn&apos;t receive the code?{' '}
+              {secondsLeft > 0 ? (
+                <span className="text-gray-400">
+                  Resend in 00:{String(secondsLeft).padStart(2, '0')}
+                </span>
+              ) : (
+                <button onClick={handleResend} disabled={loading} className="font-semibold text-green-600">
+                  Resend
+                </button>
+              )}
+            </p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
