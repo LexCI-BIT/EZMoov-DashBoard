@@ -47,12 +47,32 @@ export async function fetchDrivers(): Promise<DriverRow[]> {
   return (data ?? []) as DriverRow[];
 }
 
+/**
+ * Total value of a booking.
+ *
+ * The numeric `fare` column was dropped and replaced by `amount` (jsonb).
+ * Falls back to summing the components if total_price is ever absent.
+ */
+export function bookingTotal(b: BookingRow): number {
+  const a = b.amount;
+  if (!a) return 0;
+
+  if (typeof a.total_price === 'number') return a.total_price;
+
+  return (
+    Number(a.base_fare ?? 0) +
+    Number(a.distance_charges ?? 0) +
+    Number(a['taxes_&_gst'] ?? 0) -
+    Number(a.discount_amount ?? 0)
+  );
+}
+
 /** Bookings from the last 7 days — small enough to aggregate client-side. */
 export async function fetchRecentBookings(): Promise<BookingRow[]> {
   const { data, error } = await supabase
     .from('bookings')
     .select(
-      'id, customer_id, customer_phone, driver_id, driver_name, status, fare, pickup_address, drop_address, created_at'
+      'id, customer_id, customer_name, customer_phone, driver_id, driver_name, status, amount, service, pickup_address, drop_address, created_at'
     )
     .gte('created_at', daysAgo(6).toISOString())
     .order('created_at', { ascending: false });
@@ -105,6 +125,8 @@ export async function fetchCustomers(
   // Fallback: distinct customer_id values seen in bookings.
   const byId = new Map<string, CustomerView>();
   for (const b of bookings) {
+    // customer_id is nullable now that it's a real uuid FK.
+    if (!b.customer_id) continue;
     const existing = byId.get(b.customer_id);
     if (existing) {
       existing.rides += 1;
@@ -112,7 +134,7 @@ export async function fetchCustomers(
     } else {
       byId.set(b.customer_id, {
         id: b.customer_id,
-        name: b.customer_id,
+        name: b.customer_name?.trim() || b.customer_id,
         phone: b.customer_phone ?? '—',
         email: '—',
         status: 'ACTIVE',
@@ -165,7 +187,7 @@ function buildWeeklyEarnings(bookings: BookingRow[]): DayEarnings[] {
     created.setHours(0, 0, 0, 0);
     const offset = Math.round((startOfToday().getTime() - created.getTime()) / 86_400_000);
     const idx = 6 - offset;
-    if (idx >= 0 && idx < 7) buckets[idx].revenue += Number(b.fare ?? 0);
+    if (idx >= 0 && idx < 7) buckets[idx].revenue += bookingTotal(b);
   }
 
   for (const bucket of buckets) bucket.label = formatCompactRupees(bucket.revenue);
@@ -184,7 +206,7 @@ export async function fetchAdminData(): Promise<AdminData> {
 
   const earningsToday = todaysBookings
     .filter((b) => b.status === 'completed')
-    .reduce((sum, b) => sum + Number(b.fare ?? 0), 0);
+    .reduce((sum, b) => sum + bookingTotal(b), 0);
 
   return {
     stats: {

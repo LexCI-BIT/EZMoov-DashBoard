@@ -24,14 +24,32 @@ export interface DriverRow {
   created_at: string | null;
 }
 
+/**
+ * The fare breakdown, stored as jsonb in bookings.amount.
+ * Note the '&' in the tax key — it comes from the writer and has to be
+ * quoted in SQL, so prefer reading it through bookingTotal() below.
+ */
+export interface BookingAmount {
+  base_fare?: number;
+  distance_charges?: number;
+  'taxes_&_gst'?: number;
+  discount_amount?: number;
+  promo_code?: string;
+  total_price?: number;
+}
+
 export interface BookingRow {
   id: string;
-  customer_id: string;
+  customer_id: string | null;
+  customer_name: string | null;
   customer_phone: string | null;
   driver_id: string | null;
   driver_name: string | null;
   status: string;
-  fare: number | null;
+  /** Replaced the old numeric `fare` column. */
+  amount: BookingAmount | null;
+  /** standard_parcel | local_adda | bidding_outstation | shifting_experts | null */
+  service: string | null;
   pickup_address: string;
   drop_address: string;
   created_at: string | null;
