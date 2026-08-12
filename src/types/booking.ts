@@ -2,6 +2,7 @@ export interface Coordinates {
   lat: number;
   lng: number;
 }
+
 export interface LocationPoint {
   lat: number;
   lng: number;
@@ -20,10 +21,11 @@ export interface RecipientInfo {
 export interface Vehicle {
   id: string;
   name: string;
+  category: 'Two-Wheelers' | 'Three-Wheelers' | 'Mini Trucks' | 'Medium/Large Trucks';
   capacity: string;
-  description: string;
-  baseFare: number;
-  perKmRate: number;
+  description: string; // Holds the size info
+  baseFare: number;    // Fixed price for 0-3 km
+  perKmRate: number;   // Price per km after 3 km
   icon: string;
 }
 
@@ -45,10 +47,6 @@ export interface BookingPayload {
 
 export type ActiveInput = 'pickup' | 'drop' | null;
 
-/**
- * Where the user is in the live booking wizard. Distinct from BookingStatus,
- * which describes a booking that already exists in history.
- */
 export type BookingFlowStatus =
   | 'idle'
   | 'selecting_vehicle'
@@ -56,7 +54,6 @@ export type BookingFlowStatus =
   | 'searching_driver'
   | 'driver_assigned';
 
-/** Lifecycle state of a saved booking. */
 export type BookingStatus = 'active' | 'completed';
 
 export interface Booking {
@@ -73,8 +70,6 @@ export interface Booking {
     vehicleNumber: string;
   };
   createdAt: string;
-
-  // Optional fields for the Shifting Experts survey
   surveyDate?: string;
   surveyTime?: string;
 }

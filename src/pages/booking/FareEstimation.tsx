@@ -4,7 +4,7 @@ import { FaArrowLeft, FaSpinner } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useBooking } from '../../context/BookingContext';
 import { useAuth } from '../../context/AuthContext';
-import { calculateFare } from '../../services/apiService';
+import { calculateDistance, calculateFare } from '../../services/apiService';
 
 const FareEstimation: React.FC = () => {
   const navigate = useNavigate();
@@ -21,14 +21,15 @@ const FareEstimation: React.FC = () => {
     const getFare = async () => {
       if (!fare) {
         setLoadingFare(true);
-        const distance = 10; // Mocked
+        // Calculate actual distance instead of hardcoding 10
+        const distance = await calculateDistance(pickup, drop);
         const calculatedFare = await calculateFare(selectedVehicle, distance);
         setFare(calculatedFare);
         setLoadingFare(false);
       }
     };
     getFare();
-  }, [selectedVehicle, pickup, fare, setFare, navigate]);
+  }, [selectedVehicle, pickup, drop, fare, setFare, navigate]);
 
   const handleConfirmBooking = () => {
     if (!user) {
@@ -36,10 +37,6 @@ const FareEstimation: React.FC = () => {
       navigate('/login');
       return;
     }
-    
-    // Post-Auth Data Management: Ensure user ID is tied to the session/booking
-    // This assumes the backend handles user association via JWT token when creating the booking.
-    // If local context needs it, you'd update it here: setFare({...fare, userId: user.uid});
     
     navigate('/booking/rider-allocation');
   };
@@ -81,11 +78,12 @@ const FareEstimation: React.FC = () => {
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-3 text-sm">
           <div className="flex justify-between text-gray-600">
-            <span>Base Fare</span>
+            <span>Base Fare (up to 3 km)</span>
             <span>₹{fare.baseFare}</span>
           </div>
           <div className="flex justify-between text-gray-600">
-            <span>Distance Charge ({fare.distanceInKm} km)</span>
+            {/* Updated wording to reflect the math clearly */}
+            <span>Distance Charge {fare.distanceInKm > 3 ? `(${fare.distanceInKm - 3} extra km)` : '(Within 3 km)'}</span>
             <span>₹{fare.distanceCharge}</span>
           </div>
           <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-3 mt-3">
