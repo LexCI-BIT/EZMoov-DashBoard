@@ -7,33 +7,33 @@ import homepageImage from '../assets/homepage.png';
 const Home: React.FC = () => {
   return (
     <div 
-      className="h-[calc(100vh-4rem)] w-full flex items-center justify-center overflow-hidden relative bg-cover bg-center p-4"
+      className="h-[calc(100vh-4rem)] w-full flex items-center justify-start overflow-hidden relative bg-cover bg-center"
       style={{ backgroundImage: `url(${homepageImage})` }}
     >
-      {/* Dark overlay slightly increased to keep text readable over a transparent card */}
-      <div className="absolute inset-0 bg-black/30"></div>
+      {/* Gradient overlay: Darker on the left for text readability, fading to transparent on the right */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
       
-      {/* Liquid Transparent Card - More Transparent */}
-      <div className="relative w-[90%] max-w-md sm:max-w-xl md:max-w-2xl p-6 sm:p-8 md:p-10 text-center rounded-3xl border border-white/20 bg-gradient-to-br from-white/10 to-white/0 backdrop-blur-xl shadow-2xl">
+      {/* Content Container - Left Aligned */}
+      <div className="relative z-10 w-full md:w-3/4 lg:w-1/2 pl-6 sm:pl-10 md:pl-16 lg:pl-20 pr-6 flex flex-col items-start text-left mr-auto">
         
-        {/* Responsive Icon */}
-        <FaTruck className="text-5xl sm:text-6xl text-green-400 drop-shadow-md mx-auto mb-4 sm:mb-6" />
+        {/* Icon */}
+        <FaTruck className="text-3xl sm:text-4xl text-white drop-shadow-md mb-4" />
         
-        {/* Responsive Title */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg mb-3 sm:mb-4">
-          Welcome to <span className="text-green-400">EZMoov</span>
+        {/* Title */}
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-4">
+          Welcome to <span className="text-[#00c853]">EZMoov</span>
         </h1>
         
-        {/* Responsive Paragraph */}
-        <p className="text-sm sm:text-base md:text-lg text-gray-100/90 max-w-xl mx-auto mb-6 sm:mb-8 drop-shadow">
+        {/* Paragraph */}
+        <p className="text-base sm:text-lg md:text-xl text-gray-100 max-w-lg mb-8 drop-shadow-md leading-relaxed">
           Your seamless ride-booking platform. Fast, reliable, and secure. 
           Book your next ride with just a few taps.
         </p>
         
-        {/* Responsive Buttons - Now visible to everyone */}
+        {/* Button */}
         <Link 
           to="/services" 
-          className="inline-flex items-center gap-2 bg-green-600/90 hover:bg-green-500 text-white px-6 py-2.5 sm:px-8 sm:py-3 rounded-xl text-sm sm:text-base font-medium transition-all duration-300 shadow-lg hover:scale-105"
+          className="inline-flex items-center gap-2 bg-[#00c853] hover:bg-[#00a844] text-white px-6 py-3 sm:px-8 sm:py-3.5 rounded-md text-sm sm:text-base font-bold transition-all duration-300 shadow-lg hover:-translate-y-1"
         >
           View Services <FaArrowRight />
         </Link>
