@@ -133,7 +133,6 @@ const ActiveRideDetails: React.FC = () => {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-gray-600"><span>Base Fare</span><span>₹{booking.fare.baseFare}</span></div>
             <div className="flex justify-between text-gray-600"><span>Distance ({booking.fare.distanceInKm} km)</span><span>₹{booking.fare.distanceCharge}</span></div>
-            <div className="flex justify-between text-gray-600"><span>Taxes</span><span>₹{booking.fare.taxes}</span></div>
             <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-2 mt-2"><span>Total</span><span>₹{booking.fare.total}</span></div>
           </div>
         </div>

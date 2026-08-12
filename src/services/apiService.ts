@@ -45,13 +45,11 @@ export const calculateFare = async (vehicle: Vehicle, distanceInKm: number): Pro
   await mockNetworkDelay();
   const baseFare = vehicle.baseFare;
   const distanceCharge = Math.round(distanceInKm * vehicle.perKmRate);
-  const subtotal = baseFare + distanceCharge;
-  const taxes = Math.round(subtotal * 0.05); // 5% tax
   return {
     baseFare,
     distanceCharge,
-    taxes,
-    total: subtotal + taxes,
+    taxes: 0,
+    total: baseFare + distanceCharge,
     distanceInKm
   };
 };

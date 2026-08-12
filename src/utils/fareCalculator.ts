@@ -21,14 +21,12 @@ const deg2rad = (deg: number): number => {
 export const calculateFareLogic = (distance: number, vehicle: Vehicle): FareBreakdown => {
   const baseFare = vehicle.baseFare;
   const distanceCharge = Math.round(distance * vehicle.perKmRate * 100) / 100;
-  const subtotal = baseFare + distanceCharge;
-  const taxes = Math.round(subtotal * 0.18 * 100) / 100; // 18% GST mock
-  const total = Math.round((subtotal + taxes) * 100) / 100;
+  const total = Math.round((baseFare + distanceCharge) * 100) / 100;
 
   return {
     baseFare,
     distanceCharge,
-    taxes,
+    taxes: 0,
     total,
     distanceInKm: distance,
   };

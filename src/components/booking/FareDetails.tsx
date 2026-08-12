@@ -82,10 +82,6 @@ const FareDetails: React.FC = () => {
                   <span>Distance Charge ({fare?.distanceInKm} km)</span>
                   <span>₹{fare?.distanceCharge}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Taxes & Fees</span>
-                  <span>₹{fare?.taxes}</span>
-                </div>
                 <div className="flex justify-between font-bold text-lg text-gray-900 border-t pt-2 mt-2">
                   <span>Total</span>
                   <span>₹{fare?.total}</span>
