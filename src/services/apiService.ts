@@ -1,13 +1,28 @@
 import type { Coordinates, FareBreakdown, LocationInfo, Vehicle, BookingPayload } from '../types/booking';
 
-// Mock vehicle database
+// Updated Mock vehicle database with categories, sizes, and 0-3 km fixed base fares
 export const mockVehicles: Vehicle[] = [
-  { id: 'bike', name: 'Bike', capacity: 'Up to 10 kg', description: 'Groceries, medium boxes, electronics', baseFare: 25, perKmRate: 8, icon: 'FaMotorcycle' },
-  { id: 'scooter', name: 'Scooter', capacity: 'Up to 20 kg', description: 'Documents, food, parcels', baseFare: 35, perKmRate: 10, icon: 'FaBiking' },
-  { id: 'auto', name: 'Auto (3-Wheeler)', capacity: 'Up to 500 kg', description: 'Electronics, retail', baseFare: 50, perKmRate: 14, icon: 'FaCarSide' },
-  { id: 'mini_truck', name: 'Mini Truck', capacity: '750 kg – 1 Ton', description: 'Furniture, commercial', baseFare: 150, perKmRate: 22, icon: 'FaTruck' },
-  { id: 'lcv', name: 'LCV', capacity: 'Up to 2.5 Tons', description: 'Industrial, shifting', baseFare: 250, perKmRate: 30, icon: 'FaTruckMoving' },
-  { id: 'heavy_truck', name: 'Heavy Truck', capacity: '5+ Tons', description: 'Warehouse, bulk freight', baseFare: 450, perKmRate: 45, icon: 'FaTruckMoving' },
+  // 1. Two-Wheelers
+  { id: 'v1', name: 'Bike', category: 'Two-Wheelers', capacity: 'up to 10 kg', description: ' ', baseFare: 100, perKmRate: 5, icon: 'FaMotorcycle' },
+  { id: 'v2', name: 'Scooter', category: 'Two-Wheelers', capacity: 'up to 20 kg', description: ' ', baseFare: 100, perKmRate: 5, icon: 'FaBiking' },
+  
+  // 2. Three-Wheelers
+  { id: 'v3', name: '3 Wheeler (Tempo)', category: 'Three-Wheelers', capacity: '~500 kg', description: ' ', baseFare: 175, perKmRate: 8, icon: 'FaTruck' },
+  { id: 'v4', name: '3 Wheeler Electric', category: 'Three-Wheelers', capacity: '~500 kg', description: ' ', baseFare: 175, perKmRate: 8, icon: 'FaTruck' },
+  { id: 'v5', name: 'E-Rickshaw Loader', category: 'Three-Wheelers', capacity: '~500 kg', description: ' ', baseFare: 175, perKmRate: 8, icon: 'FaTruck' },
+  { id: 'v6', name: 'Mahindra Champion', category: 'Three-Wheelers', capacity: '~500 kg', description: 'approx. 5ft', baseFare: 175, perKmRate: 8, icon: 'FaTruck' },
+
+  // 3. Mini Trucks
+  { id: 'v7', name: 'Tata Ace (Chota Hathi)', category: 'Mini Trucks', capacity: '750 kg', description: 'approx. 7ft', baseFare: 200, perKmRate: 10, icon: 'FaTruckPickup' },
+  { id: 'v8', name: 'Maruti Eeco', category: 'Mini Trucks', capacity: '~700 kg', description: 'approx. 6.5ft', baseFare: 200, perKmRate: 10, icon: 'FaCarSide' },
+  { id: 'v9', name: 'Tata Super Ace', category: 'Mini Trucks', capacity: '1,000 kg', description: 'approx. 8ft', baseFare: 250, perKmRate: 12, icon: 'FaTruckPickup' },
+  { id: 'v10', name: 'Mahindra Bolero Pik-Up', category: 'Mini Trucks', capacity: '1,000 kg', description: 'approx. 8ft', baseFare: 250, perKmRate: 12, icon: 'FaTruckPickup' },
+  { id: 'v11', name: 'Mahindra Bolero Maxi Truck', category: 'Mini Trucks', capacity: '1,700 kg', description: 'approx. 9ft', baseFare: 270, perKmRate: 15, icon: 'FaTruckMoving' },
+
+  // 4. Medium/Large Trucks
+  { id: 'v12', name: 'Tata 407', category: 'Medium/Large Trucks', capacity: '~2,500 kg', description: 'approx. 9ft to 10ft', baseFare: 270, perKmRate: 15, icon: 'FaTruckMoving' },
+  { id: 'v13', name: 'Eicher Canter 14ft', category: 'Medium/Large Trucks', capacity: '3,500 kg', description: 'approx. 14ft', baseFare: 300, perKmRate: 20, icon: 'FaTruckMoving' },
+  { id: 'v14', name: 'Tata 909 / Eicher 17ft', category: 'Medium/Large Trucks', capacity: '6,000 kg', description: 'approx. 17ft', baseFare: 300, perKmRate: 20, icon: 'FaTruckMoving' },
 ];
 
 const mockNetworkDelay = () => new Promise((resolve) => setTimeout(resolve, 600));
@@ -35,21 +50,29 @@ export const reverseGeocode = async (coords: Coordinates): Promise<string> => {
 // Mock Distance Matrix API
 export const calculateDistance = async (pickup: LocationInfo, drop: LocationInfo): Promise<number> => {
   await mockNetworkDelay();
-  // Fake distance calculation (e.g., 5 to 50 km)
+  // Fake distance calculation (e.g., 2 to 15 km to properly test the 0-3 km fixed rate logic)
   if (!pickup.coordinates || !drop.coordinates) return 0;
-  return Math.floor(Math.random() * 45) + 5; 
+  return Math.floor(Math.random() * 14) + 2; 
 };
 
-// Mock Fare Calculation
+// Mock Fare Calculation with 0-3 km fixed logic
 export const calculateFare = async (vehicle: Vehicle, distanceInKm: number): Promise<FareBreakdown> => {
   await mockNetworkDelay();
-  const baseFare = vehicle.baseFare;
-  const distanceCharge = Math.round(distanceInKm * vehicle.perKmRate);
+  
+  const BASE_DISTANCE_KM = 3;
+  let distanceCharge = 0;
+  
+  // If distance is more than 3 km, charge the per km rate for the extra distance only
+  if (distanceInKm > BASE_DISTANCE_KM) {
+    const extraKms = distanceInKm - BASE_DISTANCE_KM;
+    distanceCharge = Math.round(extraKms * vehicle.perKmRate);
+  }
+
   return {
-    baseFare,
+    baseFare: vehicle.baseFare,
     distanceCharge,
     taxes: 0,
-    total: baseFare + distanceCharge,
+    total: vehicle.baseFare + distanceCharge,
     distanceInKm
   };
 };
@@ -64,8 +87,6 @@ export const confirmBooking = async (_payload: BookingPayload): Promise<{ driver
   };
 };
 
-// ... existing apiService code ...
-
 // Add this new function to simulate the driver updating the status
 export const checkRideStatus = async (_bookingId: string): Promise<'active' | 'completed'> => {
   await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate network request
@@ -74,7 +95,6 @@ export const checkRideStatus = async (_bookingId: string): Promise<'active' | 'c
   const isCompleted = Math.random() < 0.2; 
   return isCompleted ? 'completed' : 'active';
 };
-// ... existing apiService code ...
 
 // Add this new function to simulate Outstation Bidding API
 export const findOutstationBid = async (_vehicleId: string): Promise<{
@@ -96,7 +116,6 @@ export const findOutstationBid = async (_vehicleId: string): Promise<{
     bidAmount: randomAmount
   };
 };
-// ... existing apiService code ...
 
 // Add this new function to simulate allocating a Survey Representative
 export const bookSurveySlot = async (_slotData: { date: string; time: string; address: string }): Promise<{
