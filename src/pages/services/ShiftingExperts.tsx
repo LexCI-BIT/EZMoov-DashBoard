@@ -25,6 +25,10 @@ const ShiftingExperts: React.FC = () => {
   const surveyVehicle: Vehicle = {
     id: 'survey',
     name: 'Pre-Move Survey',
+    // A survey isn't a real vehicle class. Shifting Experts ends in an
+    // LCV/Truck move, so this is the closest honest bucket — the surveyor's
+    // visit is priced at zero either way.
+    category: 'Medium/Large Trucks',
     capacity: 'Inspection Only',
     description: 'Expert assessment of inventory',
     baseFare: 0,
