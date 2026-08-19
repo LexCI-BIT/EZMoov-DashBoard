@@ -34,6 +34,9 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAdminData } from '../../hooks/useAdminData';
+import { DriverReview } from './DriverReview';
+import { CustomerDetail } from './CustomerDetail';
+import { DriverProfile } from './DriverProfile';
 import { driverStatus, formatCompactRupees, formatRupees } from '../../lib/adminQueries';
 import type { CustomerView, DriverRow } from '../../lib/types';
 
@@ -95,6 +98,11 @@ const iconBtn =
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [usersSubTab, setUsersSubTab] = useState<'customers' | 'drivers'>('customers');
+  /** When set, the Driver Verification tab shows the review screen instead of the list. */
+  const [reviewDriverId, setReviewDriverId] = useState<string | null>(null);
+  /** Users tab: which profile is open, if any. */
+  const [viewCustomerId, setViewCustomerId] = useState<string | null>(null);
+  const [viewDriverId, setViewDriverId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -216,6 +224,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const goToTab = (tab: Tab) => {
     setActiveTab(tab);
     setSidebarOpen(false);
+    // Leaving the tab should drop the open review, not resurrect it later.
+    setReviewDriverId(null);
+    setViewCustomerId(null);
+    setViewDriverId(null);
   };
 
   const navItem = (tab: Tab) =>
@@ -598,7 +610,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         )}
 
         {/* ------------------------ DRIVER VERIFICATION ------------------------ */}
-        {activeTab === 'drivers' && data && (
+        {activeTab === 'drivers' && data && reviewDriverId && (
+          <DriverReview
+            driverId={reviewDriverId}
+            onBack={() => setReviewDriverId(null)}
+            onChanged={refresh}
+          />
+        )}
+
+        {activeTab === 'drivers' && data && !reviewDriverId && (
           <div className="rounded-xl bg-ink-800 py-5">
             <div className="mb-5 px-5">
               <h2 className="mb-1.5 text-lg font-bold text-slate-50">Drivers Awaiting Verification</h2>
@@ -633,8 +653,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           </div>
                         </dl>
                         <button
+                          onClick={() => setReviewDriverId(drv.id)}
                           className="mt-4 flex min-h-[40px] w-full items-center justify-center rounded-lg border border-brand-500/25 bg-brand-500/10 text-[13px] font-semibold text-brand-500"
-                          title="Read-only until RLS policies are tightened"
                         >
                           Review <span className="ml-1">→</span>
                         </button>
@@ -675,8 +695,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             </td>
                             <td className={td}>
                               <button
-                                className="flex items-center text-[13px] font-semibold text-brand-500"
-                                title="Read-only until RLS policies are tightened"
+                                onClick={() => setReviewDriverId(drv.id)}
+                                className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
                               >
                                 Review <span className="ml-1">→</span>
                               </button>
@@ -693,7 +713,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         )}
 
         {/* --------------------------- USER MANAGEMENT --------------------------- */}
-        {activeTab === 'users' && data && (
+        {activeTab === 'users' && data && viewCustomerId && (
+          <CustomerDetail userId={viewCustomerId} onBack={() => setViewCustomerId(null)} />
+        )}
+
+        {activeTab === 'users' && data && viewDriverId && (
+          <DriverProfile driverId={viewDriverId} onBack={() => setViewDriverId(null)} />
+        )}
+
+        {activeTab === 'users' && data && !viewCustomerId && !viewDriverId && (
           <>
             <div className="mb-6 flex gap-6 border-b border-line pb-3 pl-2 sm:gap-8">
               <button
@@ -749,7 +777,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   <ul className="flex flex-col gap-3 px-4 md:hidden">
                     {usersSubTab === 'customers'
                       ? filteredCustomers.map((c) => (
-                          <li key={c.id} className="rounded-xl border border-line bg-ink-850 p-4">
+                          <li
+                            key={c.id}
+                            onClick={() => setViewCustomerId(c.id)}
+                            className="cursor-pointer rounded-xl border border-line bg-ink-850 p-4 transition hover:border-brand-500/40"
+                          >
                             <div className="mb-3 flex items-center gap-3">
                               <Avatar label={c.name} />
                               <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-200">{c.name}</span>
@@ -766,7 +798,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           </li>
                         ))
                       : filteredDrivers.map((d) => (
-                          <li key={d.id} className="rounded-xl border border-line bg-ink-850 p-4">
+                          <li
+                            key={d.id}
+                            onClick={() => setViewDriverId(d.id)}
+                            className="cursor-pointer rounded-xl border border-line bg-ink-850 p-4 transition hover:border-brand-500/40"
+                          >
                             <div className="mb-3 flex items-center gap-3">
                               <Avatar label={d.name} />
                               <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-200">
@@ -816,7 +852,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 </td>
                                 <td className={`${td} font-semibold`}>{c.rides}</td>
                                 <td className={td}>
-                                  <button className="flex items-center text-[13px] font-semibold text-brand-500">
+                                  <button
+                                    onClick={() => setViewCustomerId(c.id)}
+                                    className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                  >
                                     View <span className="ml-1">→</span>
                                   </button>
                                 </td>
@@ -839,7 +878,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                   {d.rating != null ? Number(d.rating).toFixed(1) : '—'}
                                 </td>
                                 <td className={td}>
-                                  <button className="flex items-center text-[13px] font-semibold text-brand-500">
+                                  <button
+                                    onClick={() => setViewDriverId(d.id)}
+                                    className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                  >
                                     View <span className="ml-1">→</span>
                                   </button>
                                 </td>
