@@ -157,6 +157,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const pendingDrivers = useMemo(() => drivers.filter((d) => !d.is_verified), [drivers]);
   const verifiedDrivers = useMemo(() => drivers.filter((d) => d.is_verified), [drivers]);
 
+  const driverMap = useMemo(() => {
+    const sorted = [...drivers].sort(
+      (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+    const map = new Map<string, string>();
+    sorted.forEach((d, i) => {
+      map.set(d.id, `EZMD${(i + 1).toString().padStart(4, '0')}`);
+    });
+    return map;
+  }, [drivers]);
+
   /* ---------------------------- search filtering --------------------------- */
 
   const q = searchQuery.trim().toLowerCase();
@@ -164,13 +175,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const filteredDrivers = useMemo(
     () =>
       drivers.filter(
-        (d: DriverRow) =>
-          !q ||
-          d.name?.toLowerCase().includes(q) ||
-          d.phone?.toLowerCase().includes(q) ||
-          d.email?.toLowerCase().includes(q)
+        (d: DriverRow) => {
+          const ezmdId = driverMap.get(d.id) || '';
+          return (
+            !q ||
+            d.name?.toLowerCase().includes(q) ||
+            d.phone?.toLowerCase().includes(q) ||
+            d.email?.toLowerCase().includes(q) ||
+            ezmdId.toLowerCase().includes(q)
+          );
+        }
       ),
-    [drivers, q]
+    [drivers, q, driverMap]
   );
 
   const filteredCustomers = useMemo(
@@ -645,6 +661,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           <StatusPill status={driverStatus(drv)} />
                         </div>
                         <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                          <div className="col-span-2 min-w-0">
+                            <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Unique ID</dt>
+                            <dd className="mt-0.5 truncate font-mono text-[11px] text-slate-400">{driverMap.get(drv.id)}</dd>
+                          </div>
                           <Field label="Phone">{drv.phone || '—'}</Field>
                           <Field label="Onboarding">{steps}/3 steps</Field>
                           <div className="col-span-2 min-w-0">
@@ -669,6 +689,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <thead>
                       <tr className="border-b border-line">
                         <th className={th}>Driver Name</th>
+                        <th className={th}>Unique ID</th>
                         <th className={th}>Phone</th>
                         <th className={th}>Email</th>
                         <th className={th}>Onboarding</th>
@@ -687,6 +708,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 <span className="text-sm font-semibold text-slate-200">{drv.name || '—'}</span>
                               </div>
                             </td>
+                            <td className={`${td} font-mono text-[11px] text-slate-400`}>{driverMap.get(drv.id)}</td>
                             <td className={td}>{drv.phone || '—'}</td>
                             <td className={td}>{drv.email || '—'}</td>
                             <td className={`${td} text-xs text-slate-400`}>{steps}/3 steps</td>
