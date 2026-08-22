@@ -33,13 +33,17 @@ export const Badge: React.FC<{ tone: 'green' | 'amber'; children: React.ReactNod
 );
 
 /** Label/value row with a hairline underneath, matching the design. */
-export const InfoRow: React.FC<{ label: string; children: React.ReactNode; muted?: boolean }> = ({
+export const InfoRow: React.FC<{ label: string; children: React.ReactNode; muted?: boolean; icon?: React.ReactNode }> = ({
   label,
   children,
   muted,
+  icon,
 }) => (
   <div className="flex items-start justify-between gap-6 border-b border-white/[0.06] py-4 last:border-0">
-    <span className="shrink-0 text-[15px] text-slate-400">{label}</span>
+    <div className="flex items-center gap-2.5 shrink-0 text-[15px] text-slate-400">
+      {icon && <span className="text-slate-500">{icon}</span>}
+      <span>{label}</span>
+    </div>
     <span
       className={`min-w-0 break-words text-right text-[15px] font-semibold ${
         muted ? 'italic text-slate-500' : 'text-slate-100'

@@ -31,6 +31,14 @@ import {
   Info,
   Menu,
   X,
+  Phone,
+  Star,
+  Mail,
+  Route,
+  ClipboardList,
+  User,
+  Settings,
+  ShieldCheck
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAdminData } from '../../hooks/useAdminData';
@@ -78,10 +86,13 @@ const Avatar: React.FC<{ label: string }> = ({ label }) => (
 );
 
 /** Label/value pair used inside the mobile card rows. */
-const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+const Field = ({ label, children, icon }: { label: string; children: React.ReactNode; icon?: React.ReactNode }) => (
   <div className="min-w-0">
-    <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</dt>
-    <dd className="mt-0.5 truncate text-[13px] text-slate-300">{children}</dd>
+    <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+      {icon && <span className="text-slate-400">{icon}</span>}
+      {label}
+    </dt>
+    <dd className="mt-0.5 truncate text-[13px] font-medium text-slate-200">{children}</dd>
   </div>
 );
 
@@ -679,13 +690,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                         <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
                           <div className="col-span-2 min-w-0">
-                            <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Unique ID</dt>
+                            <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                              <ClipboardList className="size-3 text-slate-400" />
+                              Unique ID
+                            </dt>
                             <dd className="mt-0.5 truncate font-mono text-[11px] text-slate-400">{driverMap.get(drv.id)}</dd>
                           </div>
-                          <Field label="Phone">{drv.phone || '—'}</Field>
-                          <Field label="Onboarding">{steps}/3 steps</Field>
+                          <Field label="Phone" icon={<Phone className="size-3" />}>{drv.phone || '—'}</Field>
+                          <Field label="Onboarding" icon={<Route className="size-3" />}>{steps}/3 steps</Field>
                           <div className="col-span-2 min-w-0">
-                            <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Email</dt>
+                            <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                              <Mail className="size-3 text-slate-400" />
+                              Email
+                            </dt>
                             <dd className="mt-0.5 truncate text-[13px] text-slate-300">{drv.email || '—'}</dd>
                           </div>
                         </dl>
@@ -705,13 +722,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   <table className="w-full border-collapse text-left">
                     <thead>
                       <tr className="border-b border-line">
-                        <th className={th}>Driver Name</th>
-                        <th className={th}>Unique ID</th>
-                        <th className={th}>Phone</th>
-                        <th className={th}>Email</th>
-                        <th className={th}>Onboarding</th>
-                        <th className={th}>Status</th>
-                        <th className={th}>Action</th>
+                        <th className={th}><div className="flex items-center gap-1.5"><User className="size-3.5" />Driver Name</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><ClipboardList className="size-3.5" />Unique ID</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Phone className="size-3.5" />Phone</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Mail className="size-3.5" />Email</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Route className="size-3.5" />Onboarding</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />Status</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Settings className="size-3.5" />Action</div></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -783,13 +800,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                         <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
                           <div className="col-span-2 min-w-0">
-                            <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Unique ID</dt>
+                            <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                              <ClipboardList className="size-3 text-slate-400" />
+                              Unique ID
+                            </dt>
                             <dd className="mt-0.5 truncate font-mono text-[11px] text-slate-400">{driverMap.get(drv.id)}</dd>
                           </div>
-                          <Field label="Phone">{drv.phone || '—'}</Field>
-                          <Field label="Rating">{drv.rating != null ? Number(drv.rating).toFixed(1) : '—'}</Field>
+                          <Field label="Phone" icon={<Phone className="size-3" />}>{drv.phone || '—'}</Field>
+                          <Field label="Rating" icon={<Star className="size-3" />}>{drv.rating != null ? Number(drv.rating).toFixed(1) : '—'}</Field>
                           <div className="col-span-2 min-w-0">
-                            <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Email</dt>
+                            <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                              <Mail className="size-3 text-slate-400" />
+                              Email
+                            </dt>
                             <dd className="mt-0.5 truncate text-[13px] text-slate-300">{drv.email || '—'}</dd>
                           </div>
                         </dl>
@@ -809,13 +832,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   <table className="w-full border-collapse text-left">
                     <thead>
                       <tr className="border-b border-line">
-                        <th className={th}>Driver Name</th>
-                        <th className={th}>Unique ID</th>
-                        <th className={th}>Phone</th>
-                        <th className={th}>Email</th>
-                        <th className={th}>Rating</th>
-                        <th className={th}>Status</th>
-                        <th className={th}>Action</th>
+                        <th className={th}><div className="flex items-center gap-1.5"><User className="size-3.5" />Driver Name</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><ClipboardList className="size-3.5" />Unique ID</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Phone className="size-3.5" />Phone</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Mail className="size-3.5" />Email</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Star className="size-3.5" />Rating</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />Status</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Settings className="size-3.5" />Action</div></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -932,10 +955,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               <span className="text-[11px] font-bold tracking-wide text-brand-500">{c.status}</span>
                             </div>
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-                              <Field label="Phone">{c.phone}</Field>
-                              <Field label="Rides">{c.rides}</Field>
+                              <Field label="Phone" icon={<Phone className="size-3" />}>{c.phone}</Field>
+                              <Field label="Rides" icon={<Route className="size-3" />}>{c.rides}</Field>
                               <div className="col-span-2 min-w-0">
-                                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Email</dt>
+                                <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                  <Mail className="size-3 text-slate-400" />
+                                  Email
+                                </dt>
                                 <dd className="mt-0.5 truncate text-[13px] text-slate-300">{c.email}</dd>
                               </div>
                             </dl>
@@ -955,10 +981,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               <StatusPill status={driverStatus(d)} />
                             </div>
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-                              <Field label="Phone">{d.phone || '—'}</Field>
-                              <Field label="Rating">{d.rating != null ? Number(d.rating).toFixed(1) : '—'}</Field>
+                              <Field label="Phone" icon={<Phone className="size-3" />}>{d.phone || '—'}</Field>
+                              <Field label="Rating" icon={<Star className="size-3" />}>{d.rating != null ? Number(d.rating).toFixed(1) : '—'}</Field>
                               <div className="col-span-2 min-w-0">
-                                <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Email</dt>
+                                <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                                  <Mail className="size-3 text-slate-400" />
+                                  Email
+                                </dt>
                                 <dd className="mt-0.5 truncate text-[13px] text-slate-300">{d.email || '—'}</dd>
                               </div>
                             </dl>
@@ -971,12 +1000,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <table className="w-full border-collapse text-left">
                       <thead>
                         <tr className="border-b border-line">
-                          <th className={th}>Name</th>
-                          <th className={th}>Phone</th>
-                          <th className={th}>Email</th>
-                          <th className={th}>{usersSubTab === 'customers' ? 'Status' : 'Verification'}</th>
-                          <th className={th}>{usersSubTab === 'customers' ? 'Rides' : 'Rating'}</th>
-                          <th className={th}>Action</th>
+                          <th className={th}><div className="flex items-center gap-1.5"><User className="size-3.5" />Name</div></th>
+                          <th className={th}><div className="flex items-center gap-1.5"><Phone className="size-3.5" />Phone</div></th>
+                          <th className={th}><div className="flex items-center gap-1.5"><Mail className="size-3.5" />Email</div></th>
+                          <th className={th}>
+                            <div className="flex items-center gap-1.5">
+                              <ShieldCheck className="size-3.5" />
+                              {usersSubTab === 'customers' ? 'Status' : 'Verification'}
+                            </div>
+                          </th>
+                          <th className={th}>
+                            <div className="flex items-center gap-1.5">
+                              {usersSubTab === 'customers' ? <Route className="size-3.5" /> : <Star className="size-3.5" />}
+                              {usersSubTab === 'customers' ? 'Rides' : 'Rating'}
+                            </div>
+                          </th>
+                          <th className={th}><div className="flex items-center gap-1.5"><Settings className="size-3.5" />Action</div></th>
                         </tr>
                       </thead>
                       <tbody>

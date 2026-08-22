@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LiveTrackerMap } from './LiveTrackerMap';
-import { AlertCircle, CheckCircle2, Clock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, Eye, EyeOff, Loader2, User, Mail, Phone, MapPin, Calendar, Hash, FileText, UserCircle, Landmark, Code, CreditCard } from 'lucide-react';
 import {
   fetchDriverProfile,
   formatMemberSince,
@@ -96,48 +96,50 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
     <div>
       <BackLink label="Back to Drivers" onClick={onBack} />
 
-      <div className={profileCard}>
+      <div className="flex flex-col gap-6">
         {/* IDENTITY */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <Avatar name={name} />
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-2xl font-bold text-white">{name}</h2>
-            <p className="mt-1 truncate text-[15px] text-slate-400">
-              {driver.email || '—'} · {driver.phone || '—'}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge tone={fullyVerified ? 'green' : 'amber'}>
-              {fullyVerified ? (
-                <CheckCircle2 className="size-3" />
-              ) : (
-                <Clock className="size-3" />
-              )}
-              {fullyVerified ? 'VERIFIED' : 'PENDING'}
-            </Badge>
-            {driver.is_online ? <Badge tone="green">ONLINE</Badge> : <Badge tone="green">ACTIVE</Badge>}
+        <div className={`${profileCard} mb-2`}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <Avatar name={name} />
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-2xl font-bold text-white">{name}</h2>
+              <p className="mt-1 truncate text-[15px] text-slate-400">
+                {driver.email || '—'} · {driver.phone || '—'}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone={fullyVerified ? 'green' : 'amber'}>
+                {fullyVerified ? (
+                  <CheckCircle2 className="size-3" />
+                ) : (
+                  <Clock className="size-3" />
+                )}
+                {fullyVerified ? 'VERIFIED' : 'PENDING'}
+              </Badge>
+              {driver.is_online ? <Badge tone="green">ONLINE</Badge> : <Badge tone="green">ACTIVE</Badge>}
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* PERSONAL INFORMATION */}
-          <div>
+          <div className={profileCard}>
             <div className={sectionLabel}>Personal Information</div>
-            <InfoRow label="Full Name">{name}</InfoRow>
-            <InfoRow label="Email">{driver.email || '—'}</InfoRow>
-            <InfoRow label="Phone">{driver.phone || '—'}</InfoRow>
+            <InfoRow label="Full Name" icon={<User className="size-4" />}>{name}</InfoRow>
+            <InfoRow label="Email" icon={<Mail className="size-4" />}>{driver.email || '—'}</InfoRow>
+            <InfoRow label="Phone" icon={<Phone className="size-4" />}>{driver.phone || '—'}</InfoRow>
             {/* public.drivers has no address column at all. */}
-            <InfoRow label="Address" muted>
+            <InfoRow label="Address" muted icon={<MapPin className="size-4" />}>
               {ADDRESS_UNAVAILABLE}
             </InfoRow>
-            <InfoRow label="Member Since">{formatMemberSince(driver.created_at)}</InfoRow>
+            <InfoRow label="Member Since" icon={<Calendar className="size-4" />}>{formatMemberSince(driver.created_at)}</InfoRow>
           </div>
 
           {/* ACTIVITY + VERIFICATION */}
-          <div className="flex flex-col gap-8">
+          <div className={`${profileCard} flex flex-col gap-8`}>
             <div>
               <div className={sectionLabel}>Activity Summary</div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <StatTile value={stats.totalRides} label="Total Rides" />
                 <StatTile
                   value={driver.rating != null ? Number(driver.rating).toFixed(1) : '—'}
@@ -159,13 +161,13 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
         </div>
 
         {/* VEHICLE */}
-        <div className="mt-10 border-t border-white/[0.06] pt-8">
+        <div className={profileCard}>
           <div className={sectionLabel}>Vehicle Information</div>
           {vehicle ? (
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
-                <InfoRow label="Vehicle Number">{vehicle.vehicle_number || '—'}</InfoRow>
-                <InfoRow label="RC Number">{vehicle.rc_number || '—'}</InfoRow>
+                <InfoRow label="Vehicle Number" icon={<Hash className="size-4" />}>{vehicle.vehicle_number || '—'}</InfoRow>
+                <InfoRow label="RC Number" icon={<FileText className="size-4" />}>{vehicle.rc_number || '—'}</InfoRow>
               </div>
               <ImageTile label="RC Image" url={vehicle.rc_pic_url} />
             </div>
@@ -175,14 +177,14 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
         </div>
 
         {/* BANK */}
-        <div className="mt-10 border-t border-white/[0.06] pt-8">
+        <div className={profileCard}>
           <div className={sectionLabel}>Bank Information</div>
           {bank ? (
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
-                <InfoRow label="Account Holder">{bank.account_holder_name || '—'}</InfoRow>
-                <InfoRow label="Bank Name">{bank.bank_name || '—'}</InfoRow>
-                <InfoRow label="Account Number">
+                <InfoRow label="Account Holder" icon={<UserCircle className="size-4" />}>{bank.account_holder_name || '—'}</InfoRow>
+                <InfoRow label="Bank Name" icon={<Landmark className="size-4" />}>{bank.bank_name || '—'}</InfoRow>
+                <InfoRow label="Account Number" icon={<Hash className="size-4" />}>
                   <span className="inline-flex items-center gap-2">
                     <span className="font-mono">
                       {showAccount ? bank.account_number : maskAccountNumber(bank.account_number)}
@@ -196,8 +198,8 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
                     </button>
                   </span>
                 </InfoRow>
-                <InfoRow label="IFSC Code">{bank.ifsc_code || '—'}</InfoRow>
-                <InfoRow label="UPI ID">{bank.upi_id || '—'}</InfoRow>
+                <InfoRow label="IFSC Code" icon={<Code className="size-4" />}>{bank.ifsc_code || '—'}</InfoRow>
+                <InfoRow label="UPI ID" icon={<CreditCard className="size-4" />}>{bank.upi_id || '—'}</InfoRow>
               </div>
               <ImageTile label="Passbook" url={bank.passbook_pic_url} />
             </div>
@@ -208,7 +210,7 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
 
         {/* LIVE LOCATION (Only for fully verified drivers) */}
         {fullyVerified && (
-          <div className="mt-10 border-t border-white/[0.06] pt-8">
+          <div className={profileCard}>
             <div className="mb-4">
               <div className={sectionLabel}>Live Location</div>
               <p className="mt-1 text-sm text-slate-400">

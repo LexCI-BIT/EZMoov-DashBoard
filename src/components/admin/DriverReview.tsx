@@ -11,6 +11,10 @@ import {
   Eye,
   EyeOff,
   ImageOff,
+  Hash,
+  UserCircle,
+  Code,
+  CreditCard
 } from 'lucide-react';
 import { fetchDriverDetail, maskAccountNumber, verifyDriverSection } from '../../lib/adminQueries';
 import type { DriverDetail, VerifySection } from '../../lib/types';
@@ -54,9 +58,12 @@ const ImageTile: React.FC<{ label: string; url: string | null | undefined }> = (
   );
 };
 
-const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+const Row: React.FC<{ label: string; children: React.ReactNode; icon?: React.ReactNode }> = ({ label, children, icon }) => (
   <div className="flex items-center justify-between gap-4 border-b border-white/5 py-3 last:border-0">
-    <span className="shrink-0 text-[13px] text-slate-400">{label}</span>
+    <div className="flex items-center gap-2.5 shrink-0 text-[13px] text-slate-400">
+      {icon && <span className="text-slate-500">{icon}</span>}
+      <span>{label}</span>
+    </div>
     <span className="min-w-0 truncate text-right text-[13px] font-semibold text-slate-100">
       {children}
     </span>
@@ -304,8 +311,8 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
         {vehicle ? (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
-              <Row label="Vehicle Number">{vehicle.vehicle_number || '—'}</Row>
-              <Row label="RC Number">{vehicle.rc_number || '—'}</Row>
+              <Row label="Vehicle Number" icon={<Hash className="size-4" />}>{vehicle.vehicle_number || '—'}</Row>
+              <Row label="RC Number" icon={<FileText className="size-4" />}>{vehicle.rc_number || '—'}</Row>
             </div>
             <ImageTile label="RC Image" url={vehicle.rc_pic_url} />
           </div>
@@ -332,9 +339,9 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
         {bank ? (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div>
-              <Row label="Account Holder">{bank.account_holder_name || '—'}</Row>
-              <Row label="Bank Name">{bank.bank_name || '—'}</Row>
-              <Row label="Account Number">
+              <Row label="Account Holder" icon={<UserCircle className="size-4" />}>{bank.account_holder_name || '—'}</Row>
+              <Row label="Bank Name" icon={<Landmark className="size-4" />}>{bank.bank_name || '—'}</Row>
+              <Row label="Account Number" icon={<Hash className="size-4" />}>
                 <span className="inline-flex items-center gap-2">
                   <span className="font-mono">
                     {showAccount ? bank.account_number : maskAccountNumber(bank.account_number)}
@@ -348,8 +355,8 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
                   </button>
                 </span>
               </Row>
-              <Row label="IFSC Code">{bank.ifsc_code || '—'}</Row>
-              <Row label="UPI ID">{bank.upi_id || '—'}</Row>
+              <Row label="IFSC Code" icon={<Code className="size-4" />}>{bank.ifsc_code || '—'}</Row>
+              <Row label="UPI ID" icon={<CreditCard className="size-4" />}>{bank.upi_id || '—'}</Row>
             </div>
             <ImageTile label="Passbook" url={bank.passbook_pic_url} />
           </div>
