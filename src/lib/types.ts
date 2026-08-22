@@ -23,6 +23,9 @@ export interface DriverRow {
   is_bank_details_verified: boolean | null;
   rating: number | null;
   created_at: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  last_location_update?: string | null;
 }
 
 export interface VehicleRow {

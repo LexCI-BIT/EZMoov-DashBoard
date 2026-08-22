@@ -44,7 +44,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type Tab = 'home' | 'drivers' | 'users';
+type Tab = 'home' | 'drivers' | 'verified_drivers' | 'users';
 
 /** Round a max value up to a readable axis ceiling. */
 function niceCeiling(max: number, step: number): number {
@@ -189,6 +189,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     [drivers, q, driverMap]
   );
 
+  const filteredPendingDrivers = useMemo(
+    () => filteredDrivers.filter((d) => !d.is_verified),
+    [filteredDrivers]
+  );
+
+  const filteredVerifiedDrivers = useMemo(
+    () => filteredDrivers.filter((d) => d.is_verified),
+    [filteredDrivers]
+  );
+
   const filteredCustomers = useMemo(
     () =>
       customers.filter(
@@ -258,6 +268,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       ? 'Dashboard Overview'
       : activeTab === 'drivers'
         ? 'Driver Verification Queue'
+      : activeTab === 'verified_drivers'
+        ? 'Verified Drivers'
         : 'User Management';
 
   /* -------------------------------- render --------------------------------- */
@@ -306,10 +318,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <UserCheck className={`size-[18px] ${activeTab === 'drivers' ? 'text-brand-500' : 'text-slate-400'}`} />
             <span className="flex-1 text-left">Driver Verification</span>
             {pendingDrivers.length > 0 && (
-              <span className="flex size-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
+              <span className="flex size-5 items-center justify-center rounded-full bg-amber-500 text-[11px] font-bold text-white">
                 {pendingDrivers.length}
               </span>
             )}
+          </button>
+
+          <button onClick={() => goToTab('verified_drivers')} className={navItem('verified_drivers')}>
+            <CheckCircle2 className={`size-[18px] ${activeTab === 'verified_drivers' ? 'text-brand-500' : 'text-slate-400'}`} />
+            <span className="flex-1 text-left">Verified Drivers</span>
           </button>
 
           <button onClick={() => goToTab('users')} className={navItem('users')}>
@@ -639,17 +656,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <div className="mb-5 px-5">
               <h2 className="mb-1.5 text-lg font-bold text-slate-50">Drivers Awaiting Verification</h2>
               <p className="text-xs text-slate-500">
-                {pendingDrivers.length} unverified · {verifiedDrivers.length} verified
+                {pendingDrivers.length} unverified
               </p>
             </div>
 
-            {filteredDrivers.length === 0 ? (
-              <EmptyRow message={q ? `No drivers match "${searchQuery}".` : 'No drivers in the database yet.'} />
+            {filteredPendingDrivers.length === 0 ? (
+              <EmptyRow message={q ? `No pending drivers match "${searchQuery}".` : 'No drivers awaiting verification.'} />
             ) : (
               <>
                 {/* Phone/tablet: stacked cards */}
                 <ul className="flex flex-col gap-3 px-4 md:hidden">
-                  {filteredDrivers.map((drv) => {
+                  {filteredPendingDrivers.map((drv) => {
                     const steps = [drv.is_vehicle_added, drv.is_documents_uploaded, drv.is_bank_details_added].filter(Boolean).length;
                     return (
                       <li key={drv.id} className="rounded-xl border border-line bg-ink-850 p-4">
@@ -698,7 +715,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredDrivers.map((drv) => {
+                      {filteredPendingDrivers.map((drv) => {
                         const steps = [drv.is_vehicle_added, drv.is_documents_uploaded, drv.is_bank_details_added].filter(Boolean).length;
                         return (
                           <tr key={drv.id} className="border-b border-white/[0.02]">
@@ -721,6 +738,111 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
                               >
                                 Review <span className="ml-1">→</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ------------------------ VERIFIED DRIVERS ------------------------ */}
+        {activeTab === 'verified_drivers' && data && viewDriverId && (
+          <DriverProfile driverId={viewDriverId} onBack={() => setViewDriverId(null)} />
+        )}
+
+        {activeTab === 'verified_drivers' && data && !viewDriverId && (
+          <div className="rounded-xl bg-ink-800 py-5">
+            <div className="mb-5 px-5">
+              <h2 className="mb-1.5 text-lg font-bold text-slate-50">Verified Drivers</h2>
+              <p className="text-xs text-slate-500">
+                {verifiedDrivers.length} verified drivers
+              </p>
+            </div>
+
+            {filteredVerifiedDrivers.length === 0 ? (
+              <EmptyRow message={q ? `No verified drivers match "${searchQuery}".` : 'No verified drivers found.'} />
+            ) : (
+              <>
+                {/* Phone/tablet: stacked cards */}
+                <ul className="flex flex-col gap-3 px-4 md:hidden">
+                  {filteredVerifiedDrivers.map((drv) => {
+                    return (
+                      <li key={drv.id} className="rounded-xl border border-line bg-ink-850 p-4">
+                        <div className="mb-3 flex items-center gap-3">
+                          <Avatar label={drv.name} />
+                          <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-200">
+                            {drv.name || '—'}
+                          </span>
+                          <StatusPill status={driverStatus(drv)} />
+                        </div>
+                        <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                          <div className="col-span-2 min-w-0">
+                            <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Unique ID</dt>
+                            <dd className="mt-0.5 truncate font-mono text-[11px] text-slate-400">{driverMap.get(drv.id)}</dd>
+                          </div>
+                          <Field label="Phone">{drv.phone || '—'}</Field>
+                          <Field label="Rating">{drv.rating != null ? Number(drv.rating).toFixed(1) : '—'}</Field>
+                          <div className="col-span-2 min-w-0">
+                            <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Email</dt>
+                            <dd className="mt-0.5 truncate text-[13px] text-slate-300">{drv.email || '—'}</dd>
+                          </div>
+                        </dl>
+                        <button
+                          onClick={() => setViewDriverId(drv.id)}
+                          className="mt-4 flex min-h-[40px] w-full items-center justify-center rounded-lg border border-brand-500/25 bg-brand-500/10 text-[13px] font-semibold text-brand-500"
+                        >
+                          View Profile <span className="ml-1">→</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                {/* Desktop: real table */}
+                <div className="hidden md:block">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-line">
+                        <th className={th}>Driver Name</th>
+                        <th className={th}>Unique ID</th>
+                        <th className={th}>Phone</th>
+                        <th className={th}>Email</th>
+                        <th className={th}>Rating</th>
+                        <th className={th}>Status</th>
+                        <th className={th}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredVerifiedDrivers.map((drv) => {
+                        return (
+                          <tr key={drv.id} className="border-b border-white/[0.02]">
+                            <td className={td}>
+                              <div className="flex items-center gap-3">
+                                <Avatar label={drv.name} />
+                                <span className="text-sm font-semibold text-slate-200">{drv.name || '—'}</span>
+                              </div>
+                            </td>
+                            <td className={`${td} font-mono text-[11px] text-slate-400`}>{driverMap.get(drv.id)}</td>
+                            <td className={td}>{drv.phone || '—'}</td>
+                            <td className={td}>{drv.email || '—'}</td>
+                            <td className={`${td} font-semibold`}>
+                              {drv.rating != null ? Number(drv.rating).toFixed(1) : '—'}
+                            </td>
+                            <td className={td}>
+                              <StatusPill status={driverStatus(drv)} />
+                            </td>
+                            <td className={td}>
+                              <button
+                                onClick={() => setViewDriverId(drv.id)}
+                                className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                              >
+                                View Profile <span className="ml-1">→</span>
                               </button>
                             </td>
                           </tr>

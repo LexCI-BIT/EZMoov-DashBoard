@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { LiveTrackerMap } from './LiveTrackerMap';
 import { AlertCircle, CheckCircle2, Clock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import {
   fetchDriverProfile,
@@ -204,6 +205,19 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
             <p className="py-6 text-[15px] text-slate-500">No bank details submitted yet.</p>
           )}
         </div>
+
+        {/* LIVE LOCATION (Only for fully verified drivers) */}
+        {fullyVerified && (
+          <div className="mt-10 border-t border-white/[0.06] pt-8">
+            <div className="mb-4">
+              <div className={sectionLabel}>Live Location</div>
+              <p className="mt-1 text-sm text-slate-400">
+                Tracking driver in real-time via Supabase. Map updates automatically when the driver moves.
+              </p>
+            </div>
+            <LiveTrackerMap driverId={driverId} driverName={name} />
+          </div>
+        )}
       </div>
     </div>
   );
