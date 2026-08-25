@@ -38,13 +38,15 @@ import {
   ClipboardList,
   User,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  Megaphone
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAdminData } from '../../hooks/useAdminData';
 import { DriverReview } from './DriverReview';
 import { CustomerDetail } from './CustomerDetail';
 import { DriverProfile } from './DriverProfile';
+import { AnnouncementsTab } from './AnnouncementsTab';
 import { driverStatus, formatCompactRupees, formatRupees } from '../../lib/adminQueries';
 import type { CustomerView, DriverRow } from '../../lib/types';
 
@@ -52,7 +54,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type Tab = 'home' | 'drivers' | 'verified_drivers' | 'users';
+type Tab = 'home' | 'drivers' | 'verified_drivers' | 'users' | 'announcements';
 
 /** Round a max value up to a readable axis ceiling. */
 function niceCeiling(max: number, step: number): number {
@@ -102,7 +104,7 @@ const EmptyRow: React.FC<{ message: string }> = ({ message }) => (
 
 const th = 'px-6 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500';
 const td = 'px-6 py-4 text-[13px] text-slate-300';
-const cardBox = 'rounded-2xl border border-line bg-ink-850 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2)]';
+const cardBox = 'relative rounded-3xl border border-white/[0.06] bg-gradient-to-br from-white/[0.05] via-transparent to-transparent bg-ink-900/70 backdrop-blur-2xl shadow-[0_15px_35px_-5px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] ring-1 ring-white/[0.02] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(16,185,129,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] hover:border-brand-500/40 hover:bg-ink-900/90';
 const iconBtn =
   'flex size-9 shrink-0 items-center justify-center rounded-full border border-line bg-ink-700 text-slate-400 transition hover:text-slate-200 disabled:opacity-50';
 
@@ -114,7 +116,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   /** Users tab: which profile is open, if any. */
   const [viewCustomerId, setViewCustomerId] = useState<string | null>(null);
   const [viewDriverId, setViewDriverId] = useState<string | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') !== 'light';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -137,6 +141,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       cancelled = true;
     };
   }, []);
+
+  // Handle theme toggling
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
 
   // Lock body scroll while the mobile drawer is open.
   useEffect(() => {
@@ -281,6 +296,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         ? 'Driver Verification Queue'
       : activeTab === 'verified_drivers'
         ? 'Verified Drivers'
+      : activeTab === 'announcements'
+        ? 'Announcements'
         : 'User Management';
 
   /* -------------------------------- render --------------------------------- */
@@ -303,11 +320,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         }`}
       >
         <div className="mb-8 flex items-center gap-3 pl-2">
-          <div className="flex size-9 items-center justify-center rounded-[10px] border border-brand-500/30 bg-brand-950">
-            <Shield className="size-[22px] text-brand-500" />
-          </div>
+          <img src="/ezmoov-icon.png" alt="Logo" className="h-9 w-auto object-contain" />
           <div className="flex flex-col">
-            <span className="text-lg font-bold leading-tight tracking-tight text-white">EZMoov</span>
+            <span className="text-xl font-black tracking-tight">
+              <span className="text-white">EZ</span>
+              <span className="bg-gradient-to-r from-brand-400 to-[#EAB308] bg-clip-text text-transparent">moov</span>
+            </span>
             <span className="text-[11px] font-medium text-slate-500">Admin Panel</span>
           </div>
           <button
@@ -343,6 +361,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           <button onClick={() => goToTab('users')} className={navItem('users')}>
             <Users className={`size-[18px] ${activeTab === 'users' ? 'text-brand-500' : 'text-slate-400'}`} />
             <span className="flex-1 text-left">Users</span>
+          </button>
+
+          <button onClick={() => goToTab('announcements')} className={navItem('announcements')}>
+            <Megaphone className={`size-[18px] ${activeTab === 'announcements' ? 'text-brand-500' : 'text-slate-400'}`} />
+            <span className="flex-1 text-left">Announcements</span>
           </button>
         </nav>
 
@@ -653,6 +676,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </div>
         )}
 
+        {/* ------------------------ ANNOUNCEMENTS ------------------------ */}
+        {activeTab === 'announcements' && (
+          <AnnouncementsTab />
+        )}
+
         {/* ------------------------ DRIVER VERIFICATION ------------------------ */}
         {activeTab === 'drivers' && data && reviewDriverId && (
           <DriverReview
@@ -663,7 +691,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         )}
 
         {activeTab === 'drivers' && data && !reviewDriverId && (
-          <div className="rounded-xl bg-ink-800 py-5">
+          <div className={`${cardBox} flex flex-col py-5`}>
             <div className="mb-5 px-5">
               <h2 className="mb-1.5 text-lg font-bold text-slate-50">Drivers Awaiting Verification</h2>
               <p className="text-xs text-slate-500">
@@ -922,7 +950,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               </div>
             )}
 
-            <div className="rounded-xl bg-ink-800 py-5">
+            <div className={`${cardBox} flex flex-col py-5`}>
               <div className="mb-5 px-5">
                 <h2 className="mb-1.5 text-lg font-bold text-slate-50">
                   {usersSubTab === 'customers' ? 'Active Customers' : 'Active Drivers'}

@@ -4,7 +4,7 @@ import { ArrowLeft, ImageOff } from 'lucide-react';
 /** Shared building blocks for the customer and driver profile screens. */
 
 export const profileCard =
-  'rounded-2xl border border-line bg-ink-850 p-5 sm:p-7 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2)]';
+  'relative rounded-3xl border border-white/[0.06] bg-gradient-to-br from-white/[0.05] via-transparent to-transparent bg-ink-900/70 p-5 sm:p-7 backdrop-blur-2xl shadow-[0_15px_35px_-5px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] ring-1 ring-white/[0.02] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(16,185,129,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] hover:border-brand-500/40 hover:bg-ink-900/90';
 
 export const sectionLabel =
   'mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500';
@@ -39,7 +39,7 @@ export const InfoRow: React.FC<{ label: string; children: React.ReactNode; muted
   muted,
   icon,
 }) => (
-  <div className="flex items-start justify-between gap-6 border-b border-white/[0.06] py-4 last:border-0">
+  <div className="group flex items-start justify-between gap-6 border-b border-white/[0.06] py-4 px-3 -mx-3 rounded-xl last:border-0 transition-all duration-300 hover:bg-brand-500/10 hover:border-brand-500/30">
     <div className="flex items-center gap-2.5 shrink-0 text-[15px] text-slate-400">
       {icon && <span className="text-slate-500">{icon}</span>}
       <span>{label}</span>
@@ -56,7 +56,7 @@ export const InfoRow: React.FC<{ label: string; children: React.ReactNode; muted
 
 /** One of the big numbers in Activity Summary. */
 export const StatTile: React.FC<{ value: React.ReactNode; label: string }> = ({ value, label }) => (
-  <div className="rounded-xl bg-ink-900 px-5 py-5">
+  <div className="rounded-xl bg-ink-900 px-5 py-5 ring-1 ring-transparent transition-all duration-300 hover:bg-ink-800 hover:-translate-y-2 hover:shadow-[0_8px_30px_-4px_rgba(16,185,129,0.2)] hover:ring-brand-500/40">
     <div className="text-3xl font-bold leading-none text-brand-400">{value}</div>
     <div className="mt-2 text-[13px] text-slate-400">{label}</div>
   </div>
@@ -93,7 +93,7 @@ export const ImageTile: React.FC<{ label: string; url: string | null | undefined
             alt={label}
             loading="lazy"
             onError={() => setFailed(true)}
-            className="h-44 w-full rounded-lg border border-line object-cover transition hover:opacity-90"
+            className="h-44 w-full rounded-lg border border-line object-cover transition-all duration-300 hover:scale-[1.05] hover:opacity-100 hover:shadow-[0_12px_40px_-10px_rgba(16,185,129,0.4)] hover:border-brand-500"
           />
         </a>
       ) : (

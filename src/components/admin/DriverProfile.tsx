@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LiveTrackerMap } from './LiveTrackerMap';
-import { AlertCircle, CheckCircle2, Clock, Eye, EyeOff, Loader2, User, Mail, Phone, MapPin, Calendar, Hash, FileText, UserCircle, Landmark, Code, CreditCard } from 'lucide-react';
+import { Activity, Car, AlertCircle, CheckCircle2, Clock, Eye, EyeOff, Loader2, User, Mail, Phone, MapPin, Calendar, Hash, FileText, UserCircle, Landmark, Code, CreditCard } from 'lucide-react';
 import {
   fetchDriverProfile,
   formatMemberSince,
@@ -124,7 +124,9 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* PERSONAL INFORMATION */}
           <div className={profileCard}>
-            <div className={sectionLabel}>Personal Information</div>
+            <div className={`${sectionLabel} flex items-center gap-2`}>
+              <User className="size-4" /> Personal Information
+            </div>
             <InfoRow label="Full Name" icon={<User className="size-4" />}>{name}</InfoRow>
             <InfoRow label="Email" icon={<Mail className="size-4" />}>{driver.email || '—'}</InfoRow>
             <InfoRow label="Phone" icon={<Phone className="size-4" />}>{driver.phone || '—'}</InfoRow>
@@ -138,7 +140,9 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
           {/* ACTIVITY + VERIFICATION */}
           <div className={`${profileCard} flex flex-col gap-8`}>
             <div>
-              <div className={sectionLabel}>Activity Summary</div>
+              <div className={`${sectionLabel} flex items-center gap-2`}>
+                <Activity className="size-4" /> Activity Summary
+              </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <StatTile value={stats.totalRides} label="Total Rides" />
                 <StatTile
@@ -162,7 +166,9 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
 
         {/* VEHICLE */}
         <div className={profileCard}>
-          <div className={sectionLabel}>Vehicle Information</div>
+          <div className={`${sectionLabel} flex items-center gap-2`}>
+            <Car className="size-4" /> Vehicle Information
+          </div>
           {vehicle ? (
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
@@ -178,7 +184,9 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
 
         {/* BANK */}
         <div className={profileCard}>
-          <div className={sectionLabel}>Bank Information</div>
+          <div className={`${sectionLabel} flex items-center gap-2`}>
+            <Landmark className="size-4" /> Bank Information
+          </div>
           {bank ? (
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
               <div>
@@ -212,7 +220,9 @@ export const DriverProfile: React.FC<DriverProfileProps> = ({ driverId, onBack }
         {fullyVerified && (
           <div className={profileCard}>
             <div className="mb-4">
-              <div className={sectionLabel}>Live Location</div>
+              <div className={`${sectionLabel} flex items-center gap-2`}>
+                <MapPin className="size-4" /> Live Location
+              </div>
               <p className="mt-1 text-sm text-slate-400">
                 Tracking driver in real-time via Supabase. Map updates automatically when the driver moves.
               </p>
