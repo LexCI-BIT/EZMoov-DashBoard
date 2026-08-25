@@ -12,7 +12,6 @@ import {
   Cell,
 } from 'recharts';
 import {
-  Shield,
   Home,
   UserCheck,
   Users,
