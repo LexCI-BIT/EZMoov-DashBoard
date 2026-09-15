@@ -36,30 +36,160 @@
   }
 
   html.light {
-    --color-ink-950: #f8fafc;
-    --color-ink-900: #f1f5f9;
+    --color-ink-950: #eaf4f0;
+    --color-ink-900: #ffffff;
     --color-ink-850: #ffffff;
-    --color-ink-800: #e2e8f0;
-    --color-ink-700: #cbd5e1;
+    --color-ink-800: #ffffff;
+    --color-ink-700: #f1f5f9;
     --color-line: #e2e8f0;
-    --color-slate-50: #020617;
-    --color-slate-100: #0f172a;
-    --color-slate-200: #1e293b;
-    --color-slate-300: #334155;
-    --color-slate-400: #475569;
+    --color-slate-50: #0f172a;
+    --color-slate-100: #1e293b;
+    --color-slate-200: #334155;
+    --color-slate-300: #475569;
+    --color-slate-400: #64748b;
     --color-slate-500: #64748b;
-    --color-white: #020617;
+    --color-white: #ffffff;
   }
 
-  html.light [class*="bg-brand-"],
-  html.light [class*="bg-amber-"],
-  html.light [class*="bg-red-"] {
-    --color-white: #ffffff;
-    --color-slate-50: #f8fafc;
-    --color-slate-100: #f1f5f9;
-    --color-slate-200: #e2e8f0;
-    --color-slate-300: #cbd5e1;
-    --color-slate-400: #94a3b8;
+  html.light body {
+    background-color: #eaf4f0 !important;
+    color: #0f172a !important;
+  }
+
+  html.light aside {
+    background-color: #ffffff !important;
+    border-right-color: #e2e8f0 !important;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  html.light aside nav button {
+    color: #475569 !important;
+  }
+
+  html.light aside nav button:hover {
+    background-color: #f1f5f9 !important;
+  }
+
+  html.light aside nav button.border-brand-500 {
+    background-color: #e8f5ee !important;
+    color: #059669 !important;
+    border-left-color: #10b981 !important;
+  }
+
+  html.light aside div.mt-auto {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  html.light main header h1 {
+    color: #0f172a !important;
+  }
+
+  html.light main header input[type="search"] {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  html.light main header button.bg-ink-700,
+  html.light main header button.border-line {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #475569 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  html.light .relative.rounded-3xl,
+  html.light .rounded-xl.bg-ink-800,
+  html.light .rounded-xl.border-line,
+  html.light .rounded-xl.bg-ink-850,
+  html.light .rounded-2xl.border-line,
+  html.light li.border-line,
+  html.light div.bg-ink-850,
+  html.light div.bg-ink-900,
+  html.light div.bg-ink-800,
+  html.light div.bg-ink-700 {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+    color: #0f172a !important;
+  }
+
+  /* Light mode table headers */
+  html.light tr.border-b.border-line,
+  html.light thead tr {
+    border-bottom-color: #e2e8f0 !important;
+    background-color: #f8fafc !important;
+  }
+
+  html.light th {
+    color: #64748b !important;
+    font-weight: 600 !important;
+  }
+
+  /* Light mode table rows */
+  html.light tr.border-b.border-white\/\[0\.02\] {
+    border-bottom-color: #f1f5f9 !important;
+  }
+
+  html.light tr.border-b.border-white\/\[0\.02\]:hover {
+    background-color: #f8fafc !important;
+  }
+
+  /* Light mode StatusPills & Status Chips */
+  html.light .border-brand-500\/20,
+  html.light span.bg-brand-500\/10 {
+    border-color: #a7f3d0 !important;
+    background-color: #e6f7ef !important;
+    color: #059669 !important;
+  }
+
+  html.light .border-amber-500\/20,
+  html.light span.bg-amber-500\/10 {
+    border-color: #fde68a !important;
+    background-color: #fff7ed !important;
+    color: #d97706 !important;
+  }
+
+  html.light .border-red-500\/30,
+  html.light .border-red-500\/20,
+  html.light span.bg-red-500\/10 {
+    border-color: #fecaca !important;
+    background-color: #fef2f2 !important;
+    color: #dc2626 !important;
+  }
+
+  /* Light mode Avatars */
+  html.light .bg-brand-500\/15 {
+    background-color: #e6f7ef !important;
+  }
+
+  html.light .text-brand-500 {
+    color: #059669 !important;
+  }
+
+  /* Light mode modals & overlays */
+  html.light .bg-black\/70,
+  html.light .bg-black\/60 {
+    background-color: rgba(15, 23, 42, 0.4) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+
+  html.light .text-white {
+    color: #0f172a !important;
+  }
+
+  html.light .text-slate-200 {
+    color: #1e293b !important;
+  }
+
+  html.light .text-slate-300 {
+    color: #334155 !important;
+  }
+
+  html.light .text-slate-400 {
+    color: #64748b !important;
   }
 
   body {
