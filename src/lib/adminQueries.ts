@@ -45,28 +45,7 @@ export function formatRupees(value: number): string {
 const DRIVER_COLUMNS =
   'id, name, email, phone, profile_pic_url, is_online, is_verified, is_vehicle_added, is_documents_uploaded, is_bank_details_added, is_vehicle_verified, is_documents_verified, is_bank_details_verified, rating, created_at';
 
-const DELETED_DRIVERS_KEY = 'ezmoov_deleted_driver_ids';
-
-export function getDeletedDriverIds(): Set<string> {
-  try {
-    const raw = localStorage.getItem(DELETED_DRIVERS_KEY);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch {
-    return new Set();
-  }
-}
-
-export function markDriverAsDeletedLocally(driverId: string): void {
-  try {
-    const set = getDeletedDriverIds();
-    set.add(driverId);
-    localStorage.setItem(DELETED_DRIVERS_KEY, JSON.stringify(Array.from(set)));
-  } catch {
-    /* ignore */
-  }
-}
-
-/** All drivers, newest first (excluding deleted drivers). */
+/** All drivers, newest first. */
 export async function fetchDrivers(): Promise<DriverRow[]> {
   const { data, error } = await supabase
     .from('drivers')
@@ -74,16 +53,13 @@ export async function fetchDrivers(): Promise<DriverRow[]> {
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(`Failed to load drivers: ${error.message}`);
-  const deletedSet = getDeletedDriverIds();
-  return ((data ?? []) as DriverRow[]).filter((d) => !deletedSet.has(d.id));
+  return (data ?? []) as DriverRow[];
 }
 
 /**
  * Permanently deletes a driver and revokes their account access on the Partner App.
  */
 export async function deleteDriver(driverId: string): Promise<void> {
-  markDriverAsDeletedLocally(driverId);
-
   // 1. Send revocation notification to Partner App so active session is revoked
   await sendDriverNotification(
     driverId,
@@ -94,9 +70,10 @@ export async function deleteDriver(driverId: string): Promise<void> {
     'login'
   );
 
-  // 2. Comprehensive cleanup of associated driver records across all schemas
+  // 2. Unlink/Cleanup associated driver records across all tables to prevent FK constraint failures
   try {
     await Promise.allSettled([
+      supabase.from('bookings').update({ driver_id: null }).eq('driver_id', driverId),
       supabase.from('vehicles').delete().eq('driver_id', driverId),
       supabase.from('documents').delete().eq('driver_id', driverId),
       supabase.from('bank_details').delete().eq('driver_id', driverId),
@@ -110,10 +87,11 @@ export async function deleteDriver(driverId: string): Promise<void> {
     /* ignore cascade errors */
   }
 
-  // 3. Delete driver row
+  // 3. Delete driver row from Supabase database so all devices reflect deletion
   const { error } = await supabase.from('drivers').delete().eq('id', driverId);
   if (error) {
-    console.warn('[adminQueries] Supabase driver table delete error:', error.message);
+    console.error('[adminQueries] Supabase driver table delete error:', error.message);
+    throw new Error(`Database error deleting driver: ${error.message}`);
   }
 }
 
