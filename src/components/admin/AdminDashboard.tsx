@@ -346,13 +346,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         }`}
       >
         <div className="mb-8 flex items-center gap-3 pl-2">
-          <img src="/ezmoov-icon.png" alt="Logo" className="h-9 w-auto object-contain" />
-          <div className="flex flex-col">
-            <span className="text-xl font-black tracking-tight">
-              <span className="text-white">EZ</span>
-              <span className="bg-gradient-to-r from-brand-400 to-[#EAB308] bg-clip-text text-transparent">moov</span>
-            </span>
-            <span className="text-[11px] font-medium text-slate-500">Admin Panel</span>
+          <img src="/ezmoov-icon.png" alt="EZMoov Logo" className="size-10 rounded-xl object-cover shadow-sm shrink-0" />
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center text-lg font-black tracking-tight leading-none">
+              <span className="text-slate-900 dark:text-white">E</span>
+              <span className="text-[#10b981] dark:text-[#10b981]">Z</span>
+              <span className="text-slate-800 dark:text-white font-extrabold tracking-wider ml-0.5">MOOV</span>
+            </div>
+            <div className="mt-1 flex items-center gap-1 text-[7.5px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+              <span>SMART TRANSPORT SOLUTIONS</span>
+            </div>
+            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Admin Panel</span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -546,8 +550,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-5">
               <div className={`${cardBox} flex flex-col p-5`}>
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-[10px] bg-brand-950">
-                    <Users className="size-5 text-brand-500" />
+                  <div className="flex size-10 items-center justify-center rounded-[10px] bg-[#e6f7ef] dark:bg-brand-950">
+                    <Users className="size-5 text-[#10b981] dark:text-brand-500" />
                   </div>
                   <span className="text-xs font-medium text-slate-400">Active</span>
                 </div>
@@ -559,8 +563,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               <div className={`${cardBox} flex flex-col p-5`}>
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-[10px] bg-brand-950">
-                    <Car className="size-5 text-brand-500" />
+                  <div className="flex size-10 items-center justify-center rounded-[10px] bg-[#e6f7ef] dark:bg-brand-950">
+                    <Car className="size-5 text-[#10b981] dark:text-brand-500" />
                   </div>
                   <span className="text-xs font-medium text-slate-400">{verifiedDrivers.length} verified</span>
                 </div>
@@ -572,8 +576,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               <div className={`${cardBox} flex flex-col p-5`}>
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-[10px] bg-[#0F2238]">
-                    <Calendar className="size-5 text-sky-400" />
+                  <div className="flex size-10 items-center justify-center rounded-[10px] bg-[#eff6ff] dark:bg-[#0F2238]">
+                    <Calendar className="size-5 text-[#3b82f6] dark:text-sky-400" />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="size-[7px] rounded-full bg-brand-500 shadow-[0_0_8px_#10B981]" />
@@ -588,8 +592,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
               <div className={`${cardBox} flex flex-col p-5`}>
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-[10px] bg-[#29210E]">
-                    <IndianRupee className="size-5 text-amber-500" />
+                  <div className="flex size-10 items-center justify-center rounded-[10px] bg-[#fff7ed] dark:bg-[#29210E]">
+                    <IndianRupee className="size-5 text-[#f97316] dark:text-amber-500" />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="size-[7px] rounded-full bg-brand-500 shadow-[0_0_8px_#10B981]" />
@@ -613,7 +617,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 <div className="-ml-4 h-[200px] sm:h-[230px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={weeklyBookings}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? "rgba(255,255,255,0.05)" : "#e2e8f0"} />
                       <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} dy={10} />
                       <YAxis
                         axisLine={false}
@@ -624,23 +628,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         domain={[0, bookingsMax]}
                       />
                       <RechartsTooltip
-                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                        cursor={{ fill: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
                         contentStyle={{
-                          backgroundColor: '#0F172A',
-                          border: '1px solid #334155',
-                          borderRadius: '6px',
+                          backgroundColor: isDarkMode ? '#0F172A' : '#ffffff',
+                          border: isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0',
+                          borderRadius: '8px',
                           fontSize: '12px',
-                          color: '#fff',
+                          color: isDarkMode ? '#fff' : '#0f172a',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                         }}
-                        itemStyle={{ color: '#22C55E' }}
+                        itemStyle={{ color: '#10B981' }}
                         formatter={(value) => [`${Number(value ?? 0)}`, 'Bookings']}
                       />
                       <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={40}>
                         {weeklyBookings.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={entry.isToday ? '#22C55E' : '#15803D'}
-                            style={entry.isToday ? { filter: 'drop-shadow(0px 0px 8px rgba(34, 197, 94, 0.6))' } : {}}
+                            fill={entry.isToday ? '#10B981' : (isDarkMode ? '#15803D' : '#bbf7d0')}
+                            style={entry.isToday ? { filter: 'drop-shadow(0px 0px 8px rgba(16, 185, 129, 0.4))' } : {}}
                           />
                         ))}
                       </Bar>
@@ -659,11 +664,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <AreaChart data={weeklyEarnings}>
                       <defs>
                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#22C55E" stopOpacity={0.35} />
-                          <stop offset="95%" stopColor="#22C55E" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.35} />
+                          <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? "rgba(255,255,255,0.05)" : "#e2e8f0"} />
                       <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} dy={10} />
                       <YAxis
                         axisLine={false}
@@ -675,24 +680,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                       />
                       <RechartsTooltip
                         contentStyle={{
-                          backgroundColor: '#0F172A',
-                          border: '1px solid #334155',
-                          borderRadius: '6px',
+                          backgroundColor: isDarkMode ? '#0F172A' : '#ffffff',
+                          border: isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0',
+                          borderRadius: '8px',
                           fontSize: '12px',
-                          color: '#fff',
+                          color: isDarkMode ? '#fff' : '#0f172a',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                         }}
-                        itemStyle={{ color: '#22C55E' }}
+                        itemStyle={{ color: '#10B981' }}
                         formatter={(value) => [formatRupees(Number(value ?? 0)), 'Revenue']}
                       />
                       <Area
                         type="monotone"
                         dataKey="revenue"
-                        stroke="#22C55E"
+                        stroke="#10B981"
                         strokeWidth={3}
                         fillOpacity={1}
                         fill="url(#colorRevenue)"
-                        activeDot={{ r: 6, fill: '#10B981', stroke: '#0B0F17', strokeWidth: 2 }}
-                        dot={{ r: 4, fill: '#10B981', stroke: '#0B0F17', strokeWidth: 2 }}
+                        activeDot={{ r: 6, fill: '#10B981', stroke: isDarkMode ? '#0B0F17' : '#ffffff', strokeWidth: 2 }}
+                        dot={{ r: 4, fill: '#10B981', stroke: isDarkMode ? '#0B0F17' : '#ffffff', strokeWidth: 2 }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
