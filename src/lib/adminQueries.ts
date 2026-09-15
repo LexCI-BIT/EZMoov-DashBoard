@@ -45,7 +45,28 @@ export function formatRupees(value: number): string {
 const DRIVER_COLUMNS =
   'id, name, email, phone, profile_pic_url, is_online, is_verified, is_vehicle_added, is_documents_uploaded, is_bank_details_added, is_vehicle_verified, is_documents_verified, is_bank_details_verified, rating, created_at';
 
-/** All drivers, newest first. */
+const DELETED_DRIVERS_KEY = 'ezmoov_deleted_driver_ids';
+
+export function getDeletedDriverIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DELETED_DRIVERS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+export function markDriverAsDeletedLocally(driverId: string): void {
+  try {
+    const set = getDeletedDriverIds();
+    set.add(driverId);
+    localStorage.setItem(DELETED_DRIVERS_KEY, JSON.stringify(Array.from(set)));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** All drivers, newest first (excluding deleted drivers). */
 export async function fetchDrivers(): Promise<DriverRow[]> {
   const { data, error } = await supabase
     .from('drivers')
@@ -53,7 +74,43 @@ export async function fetchDrivers(): Promise<DriverRow[]> {
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(`Failed to load drivers: ${error.message}`);
-  return (data ?? []) as DriverRow[];
+  const deletedSet = getDeletedDriverIds();
+  return ((data ?? []) as DriverRow[]).filter((d) => !deletedSet.has(d.id));
+}
+
+/**
+ * Permanently deletes a driver and revokes their account access on the Partner App.
+ */
+export async function deleteDriver(driverId: string): Promise<void> {
+  markDriverAsDeletedLocally(driverId);
+
+  // 1. Send revocation notification to Partner App so active session is revoked
+  await sendDriverNotification(
+    driverId,
+    'Account Deleted & Revoked',
+    'Your EZMoov driver account has been deleted by the administrator. Access to the Partner App has been revoked.',
+    'account_deleted',
+    'revoke_session',
+    'login'
+  );
+
+  // 2. Cleanup associated driver records
+  try {
+    await Promise.allSettled([
+      supabase.from('vehicles').delete().eq('driver_id', driverId),
+      supabase.from('documents').delete().eq('driver_id', driverId),
+      supabase.from('bank_details').delete().eq('driver_id', driverId),
+      supabase.from('driver_documents').delete().eq('driver_id', driverId),
+    ]);
+  } catch {
+    /* ignore cascade errors */
+  }
+
+  // 3. Delete driver profile row
+  const { error } = await supabase.from('drivers').delete().eq('id', driverId);
+  if (error) {
+    console.warn('[adminQueries] Supabase driver table delete error:', error.message);
+  }
 }
 
 /**

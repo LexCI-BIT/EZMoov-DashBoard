@@ -39,7 +39,9 @@ import {
   User,
   Settings,
   ShieldCheck,
-  Megaphone
+  Megaphone,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAdminData } from '../../hooks/useAdminData';
@@ -47,8 +49,9 @@ import { DriverReview } from './DriverReview';
 import { CustomerDetail } from './CustomerDetail';
 import { DriverProfile } from './DriverProfile';
 import { AnnouncementsTab } from './AnnouncementsTab';
-import { driverStatus, formatCompactRupees, formatRupees } from '../../lib/adminQueries';
+import { driverStatus, formatCompactRupees, formatRupees, deleteDriver } from '../../lib/adminQueries';
 import type { CustomerView, DriverRow } from '../../lib/types';
+import { toast } from 'react-toastify';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -128,7 +131,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [admin, setAdmin] = useState<{ name: string; email: string }>({ name: 'Admin', email: '' });
 
+  const [deletingDriverTarget, setDeletingDriverTarget] = useState<DriverRow | null>(null);
+  const [isDeletingDriver, setIsDeletingDriver] = useState(false);
+
   const { data, loading, error, refreshing, lastUpdated, refresh } = useAdminData();
+
+  const handleConfirmDeleteDriver = async () => {
+    if (!deletingDriverTarget || isDeletingDriver) return;
+    setIsDeletingDriver(true);
+    try {
+      await deleteDriver(deletingDriverTarget.id);
+      toast.success(`Driver "${deletingDriverTarget.name || 'Account'}" deleted. Partner App access revoked.`);
+      setDeletingDriverTarget(null);
+      refresh();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete driver.';
+      toast.error(msg);
+    } finally {
+      setIsDeletingDriver(false);
+    }
+  };
 
   // Show who is actually signed in, rather than a hardcoded name.
   useEffect(() => {
@@ -738,12 +760,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             <dd className="mt-0.5 truncate text-[13px] text-slate-300">{drv.email || '—'}</dd>
                           </div>
                         </dl>
-                        <button
-                          onClick={() => setReviewDriverId(drv.id)}
-                          className="mt-4 flex min-h-[40px] w-full items-center justify-center rounded-lg border border-brand-500/25 bg-brand-500/10 text-[13px] font-semibold text-brand-500"
-                        >
-                          Review <span className="ml-1">→</span>
-                        </button>
+                        <div className="mt-4 flex items-center gap-2">
+                          <button
+                            onClick={() => setReviewDriverId(drv.id)}
+                            className="flex min-h-[40px] flex-1 items-center justify-center rounded-lg border border-brand-500/25 bg-brand-500/10 text-[13px] font-semibold text-brand-500"
+                          >
+                            Review
+                          </button>
+                          <button
+                            onClick={() => setDeletingDriverTarget(drv)}
+                            title="Delete Driver Account"
+                            className="flex size-[40px] items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition hover:bg-red-500/20 hover:text-red-300"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
                       </li>
                     );
                   })}
@@ -782,12 +813,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               <StatusPill status={driverStatus(drv)} />
                             </td>
                             <td className={td}>
-                              <button
-                                onClick={() => setReviewDriverId(drv.id)}
-                                className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
-                              >
-                                Review <span className="ml-1">→</span>
-                              </button>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => setReviewDriverId(drv.id)}
+                                  className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                >
+                                  Review
+                                </button>
+                                <button
+                                  onClick={() => setDeletingDriverTarget(drv)}
+                                  title="Delete Driver Account"
+                                  className="flex size-7 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition hover:bg-red-500/20 hover:text-red-300"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -848,12 +888,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             <dd className="mt-0.5 truncate text-[13px] text-slate-300">{drv.email || '—'}</dd>
                           </div>
                         </dl>
-                        <button
-                          onClick={() => setViewDriverId(drv.id)}
-                          className="mt-4 flex min-h-[40px] w-full items-center justify-center rounded-lg border border-brand-500/25 bg-brand-500/10 text-[13px] font-semibold text-brand-500"
-                        >
-                          View Profile <span className="ml-1">→</span>
-                        </button>
+                        <div className="mt-4 flex items-center gap-2">
+                          <button
+                            onClick={() => setViewDriverId(drv.id)}
+                            className="flex min-h-[40px] flex-1 items-center justify-center rounded-lg border border-brand-500/25 bg-brand-500/10 text-[13px] font-semibold text-brand-500"
+                          >
+                            View Profile
+                          </button>
+                          <button
+                            onClick={() => setDeletingDriverTarget(drv)}
+                            title="Delete Driver Account"
+                            className="flex size-[40px] items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition hover:bg-red-500/20 hover:text-red-300"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
                       </li>
                     );
                   })}
@@ -893,12 +942,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               <StatusPill status={driverStatus(drv)} />
                             </td>
                             <td className={td}>
-                              <button
-                                onClick={() => setViewDriverId(drv.id)}
-                                className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
-                              >
-                                View Profile <span className="ml-1">→</span>
-                              </button>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => setViewDriverId(drv.id)}
+                                  className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                >
+                                  View Profile
+                                </button>
+                                <button
+                                  onClick={() => setDeletingDriverTarget(drv)}
+                                  title="Delete Driver Account"
+                                  className="flex size-7 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition hover:bg-red-500/20 hover:text-red-300"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -1071,7 +1129,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                     onClick={() => setViewCustomerId(c.id)}
                                     className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
                                   >
-                                    View <span className="ml-1">→</span>
+                                    View
                                   </button>
                                 </td>
                               </tr>
@@ -1093,12 +1151,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                   {d.rating != null ? Number(d.rating).toFixed(1) : '—'}
                                 </td>
                                 <td className={td}>
-                                  <button
-                                    onClick={() => setViewDriverId(d.id)}
-                                    className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
-                                  >
-                                    View <span className="ml-1">→</span>
-                                  </button>
+                                  <div className="flex items-center gap-3">
+                                    <button
+                                      onClick={() => setViewDriverId(d.id)}
+                                      className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                    >
+                                      View
+                                    </button>
+                                    <button
+                                      onClick={() => setDeletingDriverTarget(d)}
+                                      title="Delete Driver Account"
+                                      className="flex size-7 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition hover:bg-red-500/20 hover:text-red-300"
+                                    >
+                                      <Trash2 className="size-3.5" />
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -1109,6 +1176,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               )}
             </div>
           </>
+        )}
+
+        {/* DELETE DRIVER CONFIRMATION MODAL */}
+        {deletingDriverTarget && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md rounded-2xl border border-line bg-[#121824] p-6 shadow-2xl">
+              <div className="mb-4 flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-red-500/15 text-red-400">
+                    <AlertTriangle className="size-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Delete Driver Account</h3>
+                    <p className="text-xs text-slate-400">Revoke partner app access permanently</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setDeletingDriverTarget(null)}
+                  className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+
+              <p className="mb-6 text-xs leading-relaxed text-slate-300">
+                Are you sure you want to delete <strong className="text-white">{deletingDriverTarget.name || 'this driver'}</strong>? This will permanently delete their profile and revoke access to the EZMoov Partner App.
+              </p>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-line">
+                <button
+                  onClick={() => setDeletingDriverTarget(null)}
+                  disabled={isDeletingDriver}
+                  className="rounded-xl border border-line px-4 py-2 text-xs font-semibold text-slate-400 transition hover:bg-white/5 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDeleteDriver}
+                  disabled={isDeletingDriver}
+                  className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:bg-red-500 active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isDeletingDriver ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="size-4" />
+                  )}
+                  <span>Confirm Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Breathing room so the fixed Exit Admin button never covers content */}
