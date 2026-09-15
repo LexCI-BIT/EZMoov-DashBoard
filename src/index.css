@@ -57,28 +57,52 @@
   }
 
   html.light aside {
-    background-color: #ffffff !important;
-    border-right-color: #e2e8f0 !important;
-    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02) !important;
+    background-color: #059669 !important; /* Slightly darker logo green (emerald-600) */
+    border-right-color: #047857 !important; /* emerald-700 */
+    box-shadow: 2px 0 12px rgba(5, 150, 105, 0.25) !important;
+  }
+
+  /* Override text colors inside the green sidebar */
+  html.light aside .text-slate-900,
+  html.light aside .text-slate-800,
+  html.light aside .text-white,
+  html.light aside .text-\[\#10b981\] {
+    color: #ffffff !important;
+  }
+
+  html.light aside .text-slate-500,
+  html.light aside .text-slate-400 {
+    color: rgba(255, 255, 255, 0.8) !important;
   }
 
   html.light aside nav button {
-    color: #475569 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
   }
 
   html.light aside nav button:hover {
-    background-color: #f1f5f9 !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
   }
 
   html.light aside nav button.border-brand-500 {
-    background-color: #e8f5ee !important;
-    color: #059669 !important;
-    border-left-color: #10b981 !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border-left-color: #ffffff !important;
   }
 
+  /* Admin profile box at the bottom */
   html.light aside div.mt-auto {
-    background-color: #f8fafc !important;
-    border-color: #e2e8f0 !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* The avatar circle in the admin profile box */
+  html.light aside div.mt-auto .bg-brand-500 {
+    background-color: #ffffff !important;
+  }
+  
+  html.light aside div.mt-auto .text-\[\#062E21\] {
+    color: #059669 !important;
   }
 
   html.light main header h1 {

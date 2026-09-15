@@ -109,8 +109,8 @@ const EmptyRow: React.FC<{ message: string }> = ({ message }) => (
   <div className="px-5 py-8 text-center text-[13px] text-slate-500">{message}</div>
 );
 
-const th = 'px-6 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500';
-const td = 'px-6 py-4 text-[13px] text-slate-300';
+const th = 'px-3 py-3 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-500 whitespace-nowrap';
+const td = 'px-3 py-3 text-xs sm:text-[12px] text-slate-300';
 const cardBox = 'relative rounded-3xl border border-white/[0.06] bg-gradient-to-br from-white/[0.05] via-transparent to-transparent bg-ink-900/70 backdrop-blur-2xl shadow-[0_15px_35px_-5px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] ring-1 ring-white/[0.02] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(16,185,129,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] hover:border-brand-500/40 hover:bg-ink-900/90';
 const iconBtn =
   'flex size-9 shrink-0 items-center justify-center rounded-full border border-line bg-ink-700 text-slate-400 transition hover:text-slate-200 disabled:opacity-50';
@@ -346,12 +346,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         }`}
       >
         <div className="mb-8 flex items-center gap-3 pl-2">
-          <img src="/ezmoov-icon.png" alt="EZMoov Logo" className="size-10 rounded-xl object-cover shadow-sm shrink-0" />
+          <img src="/logo.png" alt="EZMoov Logo" className="size-10 rounded-xl object-cover shadow-sm shrink-0" />
           <div className="flex flex-col min-w-0">
             <div className="flex items-center text-lg font-black tracking-tight leading-none">
-              <span className="text-slate-900 dark:text-white">E</span>
-              <span className="text-[#10b981] dark:text-[#10b981]">Z</span>
-              <span className="text-slate-800 dark:text-white font-extrabold tracking-wider ml-0.5">MOOV</span>
+              <span className="text-white">E</span>
+              <span className="text-[#10b981]">Z</span>
+              <span className="text-white font-extrabold tracking-wider ml-0.5">MOOV</span>
             </div>
             <div className="mt-1 flex items-center gap-1 text-[7.5px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
               <span>SMART TRANSPORT SOLUTIONS</span>
@@ -489,8 +489,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 top-12 z-50 w-[min(280px,calc(100vw-2rem))] rounded-xl border border-line bg-ink-700 p-3 shadow-[0_10px_25px_rgba(0,0,0,0.5)]">
-                  <div className="mb-2.5 border-b border-line pb-1.5 text-[13px] font-bold text-slate-50">
+                <>
+                  {/* Invisible backdrop to catch clicks outside the popup */}
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowNotifications(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute right-0 top-12 z-50 w-[min(280px,calc(100vw-2rem))] rounded-xl border border-line bg-ink-700 p-3 shadow-[0_10px_25px_rgba(0,0,0,0.5)]">
+                    <div className="mb-2.5 border-b border-line pb-1.5 text-[13px] font-bold text-slate-50">
                     Notifications
                   </div>
                   {notifications.length === 0 && (
@@ -510,6 +517,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     </div>
                   ))}
                 </div>
+                </>
               )}
             </div>
           </div>
@@ -758,6 +766,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           </div>
                           <Field label="Phone" icon={<Phone className="size-3" />}>{drv.phone || '—'}</Field>
                           <Field label="Onboarding" icon={<Route className="size-3" />}>{steps}/3 steps</Field>
+                          <Field label="Vehicle" icon={<Car className="size-3" />}>{drv.vehicle_type || '—'}</Field>
                           <div className="col-span-2 min-w-0">
                             <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                               <Mail className="size-3 text-slate-400" />
@@ -787,7 +796,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 </ul>
 
                 {/* Desktop: real table */}
-                <div className="hidden md:block">
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full border-collapse text-left">
                     <thead>
                       <tr className="border-b border-line">
@@ -795,6 +804,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         <th className={th}><div className="flex items-center gap-1.5"><ClipboardList className="size-3.5" />Unique ID</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Phone className="size-3.5" />Phone</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Mail className="size-3.5" />Email</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Car className="size-3.5" />Vehicle Type</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Route className="size-3.5" />Onboarding</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />Status</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Settings className="size-3.5" />Action</div></th>
@@ -814,6 +824,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             <td className={`${td} font-mono text-[11px] text-slate-400`}>{driverMap.get(drv.id)}</td>
                             <td className={td}>{drv.phone || '—'}</td>
                             <td className={td}>{drv.email || '—'}</td>
+                            <td className={td}>{drv.vehicle_type || '—'}</td>
                             <td className={`${td} text-xs text-slate-400`}>{steps}/3 steps</td>
                             <td className={td}>
                               <StatusPill status={driverStatus(drv)} />
@@ -822,7 +833,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               <div className="flex items-center gap-3">
                                 <button
                                   onClick={() => setReviewDriverId(drv.id)}
-                                  className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                  className="flex items-center text-xs sm:text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
                                 >
                                   Review
                                 </button>
@@ -886,6 +897,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                           </div>
                           <Field label="Phone" icon={<Phone className="size-3" />}>{drv.phone || '—'}</Field>
                           <Field label="Rating" icon={<Star className="size-3" />}>{drv.rating != null ? Number(drv.rating).toFixed(1) : '—'}</Field>
+                          <Field label="Vehicle" icon={<Car className="size-3" />}>{drv.vehicle_type || '—'}</Field>
                           <div className="col-span-2 min-w-0">
                             <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                               <Mail className="size-3 text-slate-400" />
@@ -915,7 +927,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 </ul>
 
                 {/* Desktop: real table */}
-                <div className="hidden md:block">
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full border-collapse text-left">
                     <thead>
                       <tr className="border-b border-line">
@@ -923,6 +935,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         <th className={th}><div className="flex items-center gap-1.5"><ClipboardList className="size-3.5" />Unique ID</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Phone className="size-3.5" />Phone</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Mail className="size-3.5" />Email</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Car className="size-3.5" />Vehicle Type</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Star className="size-3.5" />Rating</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />Status</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Settings className="size-3.5" />Action</div></th>
@@ -941,6 +954,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             <td className={`${td} font-mono text-[11px] text-slate-400`}>{driverMap.get(drv.id)}</td>
                             <td className={td}>{drv.phone || '—'}</td>
                             <td className={td}>{drv.email || '—'}</td>
+                            <td className={td}>{drv.vehicle_type || '—'}</td>
                             <td className={`${td} font-semibold`}>
                               {drv.rating != null ? Number(drv.rating).toFixed(1) : '—'}
                             </td>
@@ -951,7 +965,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                               <div className="flex items-center gap-3">
                                 <button
                                   onClick={() => setViewDriverId(drv.id)}
-                                  className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                  className="flex items-center text-xs sm:text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
                                 >
                                   View Profile
                                 </button>
@@ -1092,7 +1106,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   </ul>
 
                   {/* Desktop: real table */}
-                  <div className="hidden md:block">
+                  <div className="hidden md:block overflow-x-auto">
                     <table className="w-full border-collapse text-left">
                       <thead>
                         <tr className="border-b border-line">
@@ -1133,7 +1147,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 <td className={td}>
                                   <button
                                     onClick={() => setViewCustomerId(c.id)}
-                                    className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                    className="flex items-center text-xs sm:text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
                                   >
                                     View
                                   </button>
@@ -1160,7 +1174,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                   <div className="flex items-center gap-3">
                                     <button
                                       onClick={() => setViewDriverId(d.id)}
-                                      className="flex items-center text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
+                                      className="flex items-center text-xs sm:text-[13px] font-semibold text-brand-500 transition hover:text-brand-400"
                                     >
                                       View
                                     </button>
