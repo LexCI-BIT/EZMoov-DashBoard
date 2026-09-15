@@ -94,19 +94,23 @@ export async function deleteDriver(driverId: string): Promise<void> {
     'login'
   );
 
-  // 2. Cleanup associated driver records
+  // 2. Comprehensive cleanup of associated driver records across all schemas
   try {
     await Promise.allSettled([
       supabase.from('vehicles').delete().eq('driver_id', driverId),
       supabase.from('documents').delete().eq('driver_id', driverId),
       supabase.from('bank_details').delete().eq('driver_id', driverId),
       supabase.from('driver_documents').delete().eq('driver_id', driverId),
+      supabase.from('driver_verifications').delete().eq('driver_id', driverId),
+      supabase.from('driver_locations').delete().eq('driver_id', driverId),
+      supabase.from('profiles').delete().eq('id', driverId),
+      supabase.from('users').delete().eq('id', driverId),
     ]);
   } catch {
     /* ignore cascade errors */
   }
 
-  // 3. Delete driver profile row
+  // 3. Delete driver row
   const { error } = await supabase.from('drivers').delete().eq('id', driverId);
   if (error) {
     console.warn('[adminQueries] Supabase driver table delete error:', error.message);
