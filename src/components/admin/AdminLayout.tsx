@@ -4,6 +4,8 @@ import { AdminDashboard } from './AdminDashboard';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { restoreAdminSession, signOutAdmin } from '../../lib/adminAuth';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface AdminLayoutProps {
   onNavigateHome?: () => void;
@@ -70,6 +72,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ onNavigateHome }) => {
       ) : (
         <AdminLogin onLoginSuccess={handleLoginSuccess} />
       )}
+      <ToastContainer theme="dark" position="top-right" autoClose={4000} />
     </div>
   );
 };
