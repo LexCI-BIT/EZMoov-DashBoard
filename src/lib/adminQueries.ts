@@ -43,7 +43,7 @@ export function formatRupees(value: number): string {
 }
 
 const DRIVER_COLUMNS =
-  'id, name, email, phone, profile_pic_url, is_online, is_verified, is_vehicle_added, is_documents_uploaded, is_bank_details_added, is_vehicle_verified, is_documents_verified, is_bank_details_verified, rating, created_at';
+  'id, name, email, phone, profile_pic_url, is_online, is_verified, is_vehicle_added, is_documents_uploaded, is_bank_details_added, is_vehicle_verified, is_documents_verified, is_bank_details_verified, rating, created_at, vehicle_type';
 
 /** All drivers, newest first. */
 export async function fetchDrivers(): Promise<DriverRow[]> {
@@ -235,6 +235,41 @@ export async function sendDriverNotification(
     });
   } catch (err) {
     console.warn('[adminQueries] Could not write notification to DB:', err);
+  }
+}
+
+/** Broadcasts an announcement to all drivers. */
+export async function broadcastAnnouncement(message: string): Promise<void> {
+  const { data: drivers, error: driversError } = await supabase
+    .from('drivers')
+    .select('id');
+    
+  if (driversError) throw new Error(`Failed to fetch drivers for broadcast: ${driversError.message}`);
+  if (!drivers || drivers.length === 0) return;
+
+  const now = new Date().toISOString();
+  const notifications = drivers.map(d => ({
+      user_id: d.id,
+      driver_id: d.id,
+      title: 'Admin Announcement',
+      message: message,
+      body: message,
+      type: 'admin_broadcast',
+      action: 'view_announcement',
+      screen: 'announcements',
+      data: {
+        screen: 'announcements',
+        action: 'view_announcement',
+        type: 'admin_broadcast',
+        click_action: 'announcements',
+      },
+      read: false,
+      created_at: now,
+  }));
+
+  const { error: insertError } = await supabase.from('notifications').insert(notifications);
+  if (insertError) {
+    throw new Error(`Failed to broadcast announcement: ${insertError.message}`);
   }
 }
 

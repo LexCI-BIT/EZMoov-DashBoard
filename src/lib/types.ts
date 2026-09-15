@@ -27,6 +27,7 @@ export interface DriverRow {
   latitude?: number | null;
   longitude?: number | null;
   last_location_update?: string | null;
+  vehicle_type?: string | null;
 }
 
 export interface VehicleRow {

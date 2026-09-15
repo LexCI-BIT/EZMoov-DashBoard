@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Megaphone, Send, Loader2, Clock, MessageSquare, PenLine, History } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { profileCard, sectionLabel } from './ProfileParts';
+import { broadcastAnnouncement } from '../../lib/adminQueries';
 
 interface Announcement {
   id: string;
@@ -12,7 +13,17 @@ interface Announcement {
 export const AnnouncementsTab: React.FC = () => {
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [history, setHistory] = useState<Announcement[]>([]);
+  const [history, setHistory] = useState<Announcement[]>(() => {
+    try {
+      const saved = localStorage.getItem('ezmoov_admin_announcements');
+      if (saved) {
+        return JSON.parse(saved).map((a: any) => ({ ...a, date: new Date(a.date) }));
+      }
+    } catch {
+      /* ignore */
+    }
+    return [];
+  });
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,9 +31,8 @@ export const AnnouncementsTab: React.FC = () => {
 
     setIsSending(true);
     
-    // Simulate API call to send notification to all drivers
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await broadcastAnnouncement(message.trim());
       
       const newAnnouncement: Announcement = {
         id: Date.now().toString(),
@@ -30,11 +40,18 @@ export const AnnouncementsTab: React.FC = () => {
         date: new Date(),
       };
       
-      setHistory([newAnnouncement, ...history]);
+      const updatedHistory = [newAnnouncement, ...history];
+      setHistory(updatedHistory);
+      try {
+        localStorage.setItem('ezmoov_admin_announcements', JSON.stringify(updatedHistory));
+      } catch {
+        /* ignore storage full */
+      }
+      
       toast.success('Announcement sent to all drivers successfully!');
       setMessage('');
-    } catch (error) {
-      toast.error('Failed to send announcement. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send announcement. Please try again.');
     } finally {
       setIsSending(false);
     }

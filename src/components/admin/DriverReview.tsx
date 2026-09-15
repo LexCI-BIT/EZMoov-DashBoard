@@ -243,6 +243,8 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
     { key: 'bank', label: 'Bank', done: driver.is_bank_details_verified === true },
   ];
 
+  const is3Wheeler = driver.vehicle_type === '3 Wheeler';
+
   const verifiedSectionsCount = steps.filter((s) => s.done).length;
   const allSectionsVerified = verifiedSectionsCount === 3;
 
@@ -357,10 +359,10 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
                 Identity &amp; Licence
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <ImageTile label="Driving Licence" url={documents.driving_license_url} />
+                {!is3Wheeler && <ImageTile label="Driving Licence" url={documents.driving_license_url} />}
                 <ImageTile label="Aadhaar" url={documents.aadhaar_url} />
                 <ImageTile label="PAN Card" url={documents.pan_card_url} />
-                <ImageTile label="Selfie With Vehicle" url={documents.selfie_with_vehicle_url} />
+                {!is3Wheeler && <ImageTile label="Selfie With Vehicle" url={documents.selfie_with_vehicle_url} />}
               </div>
             </div>
 
@@ -372,9 +374,13 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
                 <ImageTile label="Vehicle RC" url={documents.vehicle_rc_url} />
                 <ImageTile label="Insurance" url={documents.insurance_url} />
                 <ImageTile label="PUC Certificate" url={documents.puc_url} />
-                <ImageTile label="Permit" url={documents.permit_url} />
-                <ImageTile label="Fitness Certificate" url={documents.fitness_url} />
-                <ImageTile label="Police Clearance" url={documents.police_clearance_url} />
+                {!is3Wheeler && (
+                  <>
+                    <ImageTile label="Permit" url={documents.permit_url} />
+                    <ImageTile label="Fitness Certificate" url={documents.fitness_url} />
+                    <ImageTile label="Police Clearance" url={documents.police_clearance_url} />
+                  </>
+                )}
               </div>
             </div>
           </div>
