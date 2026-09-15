@@ -19,6 +19,7 @@ import {
   Send,
   X,
   AlertTriangle,
+  Trash2,
 } from 'lucide-react';
 import {
   fetchDriverDetail,
@@ -27,6 +28,7 @@ import {
   acceptAllDriverVerification,
   rejectAllDriverVerification,
   driverStatus,
+  deleteDriver,
 } from '../../lib/adminQueries';
 import type { DriverDetail, VerifySection } from '../../lib/types';
 import { toast } from 'react-toastify';
@@ -118,8 +120,9 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
   const [saving, setSaving] = useState<VerifySection | null>(null);
   const [showAccount, setShowAccount] = useState(false);
 
-  const [actionProcessing, setActionProcessing] = useState<'accept' | 'reject' | null>(null);
+  const [actionProcessing, setActionProcessing] = useState<'accept' | 'reject' | 'delete' | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
   const load = useCallback(async () => {
@@ -184,6 +187,24 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
       onChanged?.();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Reject failed.';
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setActionProcessing(null);
+    }
+  };
+
+  const handleDeleteDriverConfirm = async () => {
+    if (actionProcessing || saving) return;
+    setActionProcessing('delete');
+    try {
+      await deleteDriver(driverId);
+      toast.success('Driver account deleted. Partner App access revoked.');
+      setShowDeleteModal(false);
+      onChanged?.();
+      onBack();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Delete failed.';
       setError(msg);
       toast.error(msg);
     } finally {
@@ -486,7 +507,72 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
           )}
           <span>Reject</span>
         </button>
+
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          disabled={actionProcessing !== null}
+          title="Delete driver account permanently & revoke partner app access"
+          className="flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-950/50 px-3.5 py-2.5 text-xs font-bold text-red-400 shadow-md transition hover:bg-red-900/70 hover:text-red-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 sm:text-sm"
+        >
+          {actionProcessing === 'delete' ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Trash2 className="size-4" />
+          )}
+          <span className="hidden sm:inline">Delete</span>
+        </button>
       </div>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-2xl border border-line bg-[#121824] p-6 shadow-2xl">
+            <div className="mb-4 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-red-500/15 text-red-400">
+                  <AlertTriangle className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Delete Driver Account</h3>
+                  <p className="text-xs text-slate-400">Revoke partner app access permanently</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <p className="mb-6 text-xs leading-relaxed text-slate-300">
+              Are you sure you want to delete <strong className="text-white">{driver.name || 'this driver'}</strong>? This will permanently delete their account and revoke access to the EZMoov Partner App.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-line">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={actionProcessing !== null}
+                className="rounded-xl border border-line px-4 py-2 text-xs font-semibold text-slate-400 transition hover:bg-white/5 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteDriverConfirm}
+                disabled={actionProcessing !== null}
+                className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:bg-red-500 active:scale-[0.98] disabled:opacity-50"
+              >
+                {actionProcessing === 'delete' ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Trash2 className="size-4" />
+                )}
+                <span>Confirm Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* REJECTION REASON MODAL */}
       {showRejectModal && (
