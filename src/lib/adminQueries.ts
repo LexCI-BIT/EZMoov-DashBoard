@@ -156,6 +156,143 @@ export async function verifyDriverSection(
   return data as DriverRow;
 }
 
+/** Sends a notification to a specific driver with deep-link navigation metadata. */
+export async function sendDriverNotification(
+  driverId: string,
+  title: string,
+  message: string,
+  type = 'verification_update',
+  action = '',
+  targetScreen = ''
+): Promise<void> {
+  try {
+    await supabase.from('notifications').insert({
+      user_id: driverId,
+      driver_id: driverId,
+      title,
+      message,
+      body: message,
+      type,
+      action,
+      screen: targetScreen,
+      data: {
+        screen: targetScreen,
+        action,
+        type,
+        click_action: targetScreen,
+      },
+      read: false,
+      created_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn('[adminQueries] Could not write notification to DB:', err);
+  }
+}
+
+const REJECTED_DRIVERS_KEY = 'ezmoov_rejected_driver_ids';
+
+export function getRejectedDriverIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(REJECTED_DRIVERS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+export function markDriverAsRejected(driverId: string): void {
+  try {
+    const set = getRejectedDriverIds();
+    set.add(driverId);
+    localStorage.setItem(REJECTED_DRIVERS_KEY, JSON.stringify(Array.from(set)));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearDriverRejected(driverId: string): void {
+  try {
+    const set = getRejectedDriverIds();
+    set.delete(driverId);
+    localStorage.setItem(REJECTED_DRIVERS_KEY, JSON.stringify(Array.from(set)));
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Accept driver verification (all documents/sections).
+ * Sends a notification directing the driver to continue into the main driver app.
+ */
+export async function acceptAllDriverVerification(driverId: string): Promise<DriverRow> {
+  clearDriverRejected(driverId);
+  const { data, error } = await supabase
+    .from('drivers')
+    .update({
+      is_documents_verified: true,
+      is_vehicle_verified: true,
+      is_bank_details_verified: true,
+      is_verified: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', driverId)
+    .select(DRIVER_COLUMNS)
+    .single();
+
+  if (error) throw new Error(`Failed to accept driver verification: ${error.message}`);
+
+  await sendDriverNotification(
+    driverId,
+    'Verification Approved! 🎉',
+    'Congratulations! Your driver documents have been verified and accepted. Tap to continue to the Driver App.',
+    'verification_approved',
+    'continue_to_driver_app',
+    'driver_home'
+  );
+
+  return { ...(data as DriverRow), is_rejected: false };
+}
+
+/**
+ * Reject driver verification with reason and trigger notification.
+ * Sends a notification directing the driver straight to the document submission screen.
+ */
+export async function rejectAllDriverVerification(
+  driverId: string,
+  reason: string
+): Promise<DriverRow> {
+  markDriverAsRejected(driverId);
+  const { data, error } = await supabase
+    .from('drivers')
+    .update({
+      is_documents_verified: false,
+      is_vehicle_verified: false,
+      is_bank_details_verified: false,
+      is_verified: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', driverId)
+    .select(DRIVER_COLUMNS)
+    .single();
+
+  if (error) throw new Error(`Failed to reject driver verification: ${error.message}`);
+
+  const formattedReason = reason.trim()
+    ? `Reason: "${reason.trim()}". Please tap to open the Document Submission screen and upload correct documents.`
+    : 'Some submitted documents were invalid or unreadable. Please tap to open the Document Submission screen and upload correct documents.';
+
+  await sendDriverNotification(
+    driverId,
+    'Action Required: Document Resubmission Requested',
+    `Your driver document verification was rejected. ${formattedReason}`,
+    'verification_rejected',
+    'resubmit_documents',
+    'document_submission'
+  );
+
+  return { ...(data as DriverRow), is_rejected: true };
+}
+
 /**
  * Lifetime ride count and value for one participant.
  *
@@ -410,7 +547,9 @@ export async function fetchAdminData(): Promise<AdminData> {
   };
 }
 
-/** Verification state derived from the driver's boolean flags. */
-export function driverStatus(d: DriverRow): 'VERIFIED' | 'PENDING' {
-  return d.is_verified ? 'VERIFIED' : 'PENDING';
+/** Verification state derived from the driver's boolean flags and rejection tracking. */
+export function driverStatus(d: DriverRow): 'VERIFIED' | 'PENDING' | 'REJECTED' {
+  if (d.is_verified === true) return 'VERIFIED';
+  if (d.is_rejected === true || getRejectedDriverIds().has(d.id)) return 'REJECTED';
+  return 'PENDING';
 }

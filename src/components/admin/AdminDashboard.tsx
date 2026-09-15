@@ -25,6 +25,7 @@ import {
   LogOut,
   CheckCircle2,
   AlertCircle,
+  XCircle,
   RefreshCw,
   Loader2,
   Info,
@@ -63,16 +64,20 @@ function niceCeiling(max: number, step: number): number {
 
 /* ------------------------------- primitives ------------------------------- */
 
-const StatusPill: React.FC<{ status: 'VERIFIED' | 'PENDING' }> = ({ status }) => (
+const StatusPill: React.FC<{ status: 'VERIFIED' | 'PENDING' | 'REJECTED' }> = ({ status }) => (
   <span
     className={`inline-flex items-center rounded-xl border px-2.5 py-1 text-[11px] font-bold tracking-wide ${
       status === 'VERIFIED'
         ? 'border-brand-500/20 bg-brand-500/10 text-brand-500'
+        : status === 'REJECTED'
+        ? 'border-red-500/20 bg-red-500/10 text-red-400'
         : 'border-amber-500/20 bg-amber-500/10 text-amber-500'
     }`}
   >
     {status === 'VERIFIED' ? (
       <CheckCircle2 className="mr-1 size-3" />
+    ) : status === 'REJECTED' ? (
+      <XCircle className="mr-1 size-3" />
     ) : (
       <AlertCircle className="mr-1 size-3" />
     )}

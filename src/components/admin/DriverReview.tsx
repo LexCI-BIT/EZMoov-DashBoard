@@ -14,10 +14,22 @@ import {
   Hash,
   UserCircle,
   Code,
-  CreditCard
+  CreditCard,
+  XCircle,
+  Send,
+  X,
+  AlertTriangle,
 } from 'lucide-react';
-import { fetchDriverDetail, maskAccountNumber, verifyDriverSection } from '../../lib/adminQueries';
+import {
+  fetchDriverDetail,
+  maskAccountNumber,
+  verifyDriverSection,
+  acceptAllDriverVerification,
+  rejectAllDriverVerification,
+  driverStatus,
+} from '../../lib/adminQueries';
 import type { DriverDetail, VerifySection } from '../../lib/types';
+import { toast } from 'react-toastify';
 
 interface DriverReviewProps {
   driverId: string;
@@ -28,6 +40,14 @@ interface DriverReviewProps {
 
 const card = 'rounded-2xl border border-line bg-ink-850 p-4 sm:p-6';
 const sectionTitle = 'flex items-center gap-2 text-base font-bold text-white sm:text-lg';
+
+const PRESET_REASONS = [
+  'Documents unreadable or blurry',
+  'Driving Licence expired or invalid',
+  'Vehicle RC number mismatch',
+  'Bank account / IFSC details incorrect',
+  'Selfie with vehicle missing or unclear',
+];
 
 /** A document/photo tile that degrades gracefully when the URL is missing or broken. */
 const ImageTile: React.FC<{ label: string; url: string | null | undefined }> = ({ label, url }) => {
@@ -70,16 +90,24 @@ const Row: React.FC<{ label: string; children: React.ReactNode; icon?: React.Rea
   </div>
 );
 
-const StatusChip: React.FC<{ verified: boolean }> = ({ verified }) => (
+const StatusChip: React.FC<{ status: 'VERIFIED' | 'PENDING' | 'REJECTED' }> = ({ status }) => (
   <span
     className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold tracking-wide ${
-      verified
+      status === 'VERIFIED'
         ? 'border-brand-500/20 bg-brand-500/10 text-brand-500'
+        : status === 'REJECTED'
+        ? 'border-red-500/20 bg-red-500/10 text-red-400'
         : 'border-amber-500/20 bg-amber-500/10 text-amber-500'
     }`}
   >
-    {verified ? <CheckCircle2 className="size-3" /> : <Hourglass className="size-3" />}
-    {verified ? 'VERIFIED' : 'PENDING'}
+    {status === 'VERIFIED' ? (
+      <CheckCircle2 className="size-3" />
+    ) : status === 'REJECTED' ? (
+      <XCircle className="size-3" />
+    ) : (
+      <Hourglass className="size-3" />
+    )}
+    {status}
   </span>
 );
 
@@ -89,6 +117,10 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState<VerifySection | null>(null);
   const [showAccount, setShowAccount] = useState(false);
+
+  const [actionProcessing, setActionProcessing] = useState<'accept' | 'reject' | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -107,7 +139,7 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
   }, [load]);
 
   const handleVerify = async (section: VerifySection, approved: boolean) => {
-    if (saving) return;
+    if (saving || actionProcessing) return;
     setSaving(section);
     try {
       const updated = await verifyDriverSection(driverId, section, approved);
@@ -118,6 +150,44 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
       setError(err instanceof Error ? err.message : 'Update failed.');
     } finally {
       setSaving(null);
+    }
+  };
+
+  const handleAcceptAll = async () => {
+    if (actionProcessing || saving) return;
+    setActionProcessing('accept');
+    try {
+      const updated = await acceptAllDriverVerification(driverId);
+      setDetail((prev) => (prev ? { ...prev, driver: updated } : prev));
+      setError(null);
+      toast.success('Driver verification accepted! Automated approval notification sent to driver.');
+      onChanged?.();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Accept failed.';
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setActionProcessing(null);
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (actionProcessing || saving) return;
+    setActionProcessing('reject');
+    try {
+      const updated = await rejectAllDriverVerification(driverId, rejectReason);
+      setDetail((prev) => (prev ? { ...prev, driver: updated } : prev));
+      setError(null);
+      toast.warn('Driver verification rejected. Automated notification sent to driver for document resubmission.');
+      setShowRejectModal(false);
+      setRejectReason('');
+      onChanged?.();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Reject failed.';
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setActionProcessing(null);
     }
   };
 
@@ -151,6 +221,9 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
     { key: 'vehicle', label: 'Vehicle', done: driver.is_vehicle_verified === true },
     { key: 'bank', label: 'Bank', done: driver.is_bank_details_verified === true },
   ];
+
+  const verifiedSectionsCount = steps.filter((s) => s.done).length;
+  const allSectionsVerified = verifiedSectionsCount === 3;
 
   const VerifyButton: React.FC<{ section: VerifySection; done: boolean; disabled?: boolean }> = ({
     section,
@@ -205,7 +278,7 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
             {driver.phone || '—'} · {driver.email || '—'}
           </p>
         </div>
-        <StatusChip verified={driver.is_verified === true} />
+        <StatusChip status={driverStatus(driver)} />
       </div>
 
       {/* PROGRESS */}
@@ -366,6 +439,132 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
           </p>
         )}
       </div>
+
+      {/* BOTTOM-RIGHT DRIVER VERIFICATION CONTROL BAR */}
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-line bg-[#0F141C]/95 p-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-md sm:bottom-8 sm:right-8 sm:p-4">
+        <div className="flex flex-col pr-2 text-left">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Section Verification
+          </span>
+          <span className={`text-xs font-bold ${allSectionsVerified ? 'text-brand-400' : 'text-amber-400'}`}>
+            {verifiedSectionsCount}/3 Sections Verified
+          </span>
+        </div>
+
+        <button
+          onClick={handleAcceptAll}
+          disabled={!allSectionsVerified || actionProcessing !== null}
+          title={
+            allSectionsVerified
+              ? 'Accept driver verification & send approval notification'
+              : 'Please verify all 3 sections above (Documents, Vehicle, Bank) before accepting'
+          }
+          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition sm:text-sm ${
+            allSectionsVerified
+              ? 'bg-brand-500 text-[#05291D] shadow-[0_4px_16px_rgba(16,185,129,0.4)] hover:bg-brand-400 hover:scale-[1.02] active:scale-[0.98]'
+              : 'cursor-not-allowed border border-line bg-ink-800 text-slate-500 opacity-60'
+          }`}
+        >
+          {actionProcessing === 'accept' ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="size-4" />
+          )}
+          <span>Accept</span>
+        </button>
+
+        <button
+          onClick={() => setShowRejectModal(true)}
+          disabled={actionProcessing !== null}
+          title="Reject documents if missing or mismatching, & request resubmission"
+          className="flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-2.5 text-xs font-bold text-red-300 shadow-md transition hover:bg-red-500/25 hover:text-red-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 sm:text-sm"
+        >
+          {actionProcessing === 'reject' ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <XCircle className="size-4" />
+          )}
+          <span>Reject</span>
+        </button>
+      </div>
+
+      {/* REJECTION REASON MODAL */}
+      {showRejectModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-2xl border border-line bg-[#121824] p-6 shadow-2xl">
+            <div className="mb-4 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-red-500/15 text-red-400">
+                  <AlertTriangle className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Reject Driver Verification</h3>
+                  <p className="text-xs text-slate-400">
+                    Send automated resubmission notification to {driver.name || 'Driver'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRejectModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label className="mb-2 block text-xs font-semibold text-slate-300">
+                Select or enter rejection reason:
+              </label>
+              <div className="mb-3 flex flex-wrap gap-2">
+                {PRESET_REASONS.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setRejectReason(preset)}
+                    className={`rounded-lg border px-2.5 py-1 text-xs transition ${
+                      rejectReason === preset
+                        ? 'border-red-500 bg-red-500/20 font-semibold text-red-200'
+                        : 'border-line bg-ink-900 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                rows={3}
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Specify what needs correction (e.g. Driving License image is blurry, please re-upload clear photo)..."
+                className="w-full rounded-xl border border-line bg-ink-950 p-3 text-xs text-white placeholder:text-slate-600 focus:border-red-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setShowRejectModal(false)}
+                disabled={actionProcessing !== null}
+                className="rounded-xl border border-line px-4 py-2 text-xs font-semibold text-slate-400 transition hover:bg-white/5 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectConfirm}
+                disabled={actionProcessing !== null}
+                className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:bg-red-500 active:scale-[0.98] disabled:opacity-50"
+              >
+                {actionProcessing === 'reject' ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Send className="size-3.5" />
+                )}
+                <span>Reject &amp; Trigger Notification</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
