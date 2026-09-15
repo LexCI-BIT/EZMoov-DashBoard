@@ -74,12 +74,22 @@ export async function deleteDriver(driverId: string): Promise<void> {
   try {
     await Promise.allSettled([
       supabase.from('bookings').update({ driver_id: null }).eq('driver_id', driverId),
+      supabase.from('user_fcm_tokens').delete().eq('driver_id', driverId),
+      supabase.from('user_fcm_tokens').delete().eq('user_id', driverId),
+      supabase.from('fcm_tokens').delete().eq('driver_id', driverId),
+      supabase.from('fcm_tokens').delete().eq('user_id', driverId),
+      supabase.from('notifications').delete().eq('driver_id', driverId),
+      supabase.from('notifications').delete().eq('user_id', driverId),
       supabase.from('vehicles').delete().eq('driver_id', driverId),
       supabase.from('documents').delete().eq('driver_id', driverId),
       supabase.from('bank_details').delete().eq('driver_id', driverId),
       supabase.from('driver_documents').delete().eq('driver_id', driverId),
       supabase.from('driver_verifications').delete().eq('driver_id', driverId),
       supabase.from('driver_locations').delete().eq('driver_id', driverId),
+      supabase.from('wallets').delete().eq('driver_id', driverId),
+      supabase.from('driver_wallets').delete().eq('driver_id', driverId),
+      supabase.from('ratings').delete().eq('driver_id', driverId),
+      supabase.from('driver_ratings').delete().eq('driver_id', driverId),
       supabase.from('profiles').delete().eq('id', driverId),
       supabase.from('users').delete().eq('id', driverId),
     ]);
