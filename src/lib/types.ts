@@ -28,6 +28,8 @@ export interface DriverRow {
   longitude?: number | null;
   last_location_update?: string | null;
   vehicle_type?: string | null;
+  /** True when the driver has paid the one-time registration fee in the Partner App. */
+  registration_fee_paid?: boolean | null;
 }
 
 export interface VehicleRow {
