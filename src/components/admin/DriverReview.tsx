@@ -237,16 +237,17 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
 
   const { driver, vehicle, documents, bank } = detail;
 
-  const steps: { key: VerifySection; label: string; done: boolean }[] = [
+  const steps: { key: VerifySection; label: string; done: boolean; optional?: boolean }[] = [
     { key: 'documents', label: 'Documents', done: driver.is_documents_verified === true },
-    { key: 'vehicle', label: 'Vehicle', done: driver.is_vehicle_verified === true },
+    { key: 'vehicle', label: 'Vehicle', done: driver.is_vehicle_verified === true, optional: true },
     { key: 'bank', label: 'Bank', done: driver.is_bank_details_verified === true },
   ];
 
   const is3Wheeler = driver.vehicle_type === '3 Wheeler';
 
-  const verifiedSectionsCount = steps.filter((s) => s.done).length;
-  const allSectionsVerified = verifiedSectionsCount === 3;
+  const requiredSteps = steps.filter((s) => !s.optional);
+  const verifiedSectionsCount = requiredSteps.filter((s) => s.done).length;
+  const allSectionsVerified = verifiedSectionsCount === requiredSteps.length;
 
   const VerifyButton: React.FC<{ section: VerifySection; done: boolean; disabled?: boolean }> = ({
     section,
@@ -314,20 +315,22 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
             <div key={s.key} className="flex items-center gap-3">
               <div
                 className={`flex size-9 shrink-0 items-center justify-center rounded-full ${
-                  s.done ? 'bg-brand-500/10' : 'bg-amber-500/10'
+                  s.done ? 'bg-brand-500/10' : s.optional ? 'bg-slate-500/10' : 'bg-amber-500/10'
                 }`}
               >
                 {s.done ? (
                   <CheckCircle2 className="size-4 text-brand-500" />
                 ) : (
-                  <Hourglass className="size-4 text-amber-500" />
+                  <Hourglass className={`size-4 ${s.optional ? 'text-slate-400' : 'text-amber-500'}`} />
                 )}
               </div>
               <div className="min-w-0">
-                <div className={`text-sm font-bold ${s.done ? 'text-brand-500' : 'text-amber-500'}`}>
+                <div className={`text-sm font-bold ${s.done ? 'text-brand-500' : s.optional ? 'text-slate-400' : 'text-amber-500'}`}>
                   {s.label}
                 </div>
-                <div className="text-xs text-slate-400">{s.done ? 'Verified' : 'Pending'}</div>
+                <div className="text-xs text-slate-400">
+                  {s.done ? 'Verified' : s.optional ? 'Optional' : 'Pending'}
+                </div>
               </div>
             </div>
           ))}
@@ -395,11 +398,16 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
       <div className={card}>
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h3 className={sectionTitle}>
-              <Car className="size-5 text-brand-500" />
-              Vehicle Details
-            </h3>
-            <p className="mt-1 text-xs text-slate-400">Vehicle registration info</p>
+            <div className="flex items-center gap-2">
+              <h3 className={sectionTitle}>
+                <Car className="size-5 text-brand-500" />
+                Vehicle Details
+              </h3>
+              <span className="inline-flex items-center rounded-full border border-slate-500/30 bg-slate-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Optional
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-slate-400">Vehicle registration info · not required for verification</p>
           </div>
           <VerifyButton
             section="vehicle"
@@ -474,7 +482,7 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
             Section Verification
           </span>
           <span className={`text-xs font-bold ${allSectionsVerified ? 'text-brand-400' : 'text-amber-400'}`}>
-            {verifiedSectionsCount}/3 Sections Verified
+            {verifiedSectionsCount}/{requiredSteps.length} Required Verified
           </span>
         </div>
 
@@ -484,7 +492,7 @@ export const DriverReview: React.FC<DriverReviewProps> = ({ driverId, onBack, on
           title={
             allSectionsVerified
               ? 'Accept driver verification & send approval notification'
-              : 'Please verify all 3 sections above (Documents, Vehicle, Bank) before accepting'
+              : 'Please verify Documents and Bank sections before accepting (Vehicle is optional)'
           }
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition sm:text-sm ${
             allSectionsVerified
