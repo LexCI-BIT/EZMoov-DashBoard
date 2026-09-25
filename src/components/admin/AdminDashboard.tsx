@@ -42,6 +42,7 @@ import {
   Megaphone,
   Trash2,
   AlertTriangle,
+  Wallet,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAdminData } from '../../hooks/useAdminData';
@@ -905,6 +906,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             </dt>
                             <dd className="mt-0.5 truncate text-[13px] text-slate-300">{drv.email || '—'}</dd>
                           </div>
+                          <div className="col-span-2">
+                            <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                              <Wallet className="size-3 text-slate-400" />
+                              Reg. Fee
+                            </dt>
+                            <dd>
+                              {drv.registration_fee_paid === true ? (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-brand-500/30 bg-brand-500/10 px-2 py-0.5 text-[11px] font-bold text-brand-400">Paid</span>
+                              ) : drv.registration_fee_paid === false ? (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-bold text-amber-400">Unpaid</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-slate-500/30 bg-slate-500/10 px-2 py-0.5 text-[11px] font-bold text-slate-500">Unknown</span>
+                              )}
+                            </dd>
+                          </div>
                         </dl>
                         <div className="mt-4 flex items-center gap-2">
                           <button
@@ -931,13 +947,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                   <table className="w-full border-collapse text-left">
                     <thead>
                       <tr className="border-b border-line">
-                        <th className={th}><div className="flex items-center gap-1.5"><User className="size-3.5" />Driver Name</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Home className="size-3.5" />Driver Name</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><ClipboardList className="size-3.5" />Unique ID</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Phone className="size-3.5" />Phone</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Mail className="size-3.5" />Email</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Car className="size-3.5" />Vehicle Type</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Star className="size-3.5" />Rating</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" />Status</div></th>
+                        <th className={th}><div className="flex items-center gap-1.5"><Wallet className="size-3.5" />Reg. Fee</div></th>
                         <th className={th}><div className="flex items-center gap-1.5"><Settings className="size-3.5" />Action</div></th>
                       </tr>
                     </thead>
@@ -960,6 +977,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             </td>
                             <td className={td}>
                               <StatusPill status={driverStatus(drv)} />
+                            </td>
+                            <td className={td}>
+                              {drv.registration_fee_paid === true ? (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-brand-500/30 bg-brand-500/10 px-2.5 py-1 text-[11px] font-bold text-brand-400">Paid</span>
+                              ) : drv.registration_fee_paid === false ? (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-400">Unpaid</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-slate-500/30 bg-slate-500/10 px-2.5 py-1 text-[11px] font-bold text-slate-500">Unknown</span>
+                              )}
                             </td>
                             <td className={td}>
                               <div className="flex items-center gap-3">

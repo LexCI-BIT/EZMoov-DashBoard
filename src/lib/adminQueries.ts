@@ -43,7 +43,7 @@ export function formatRupees(value: number): string {
 }
 
 const DRIVER_COLUMNS =
-  'id, name, email, phone, profile_pic_url, is_online, is_verified, is_vehicle_added, is_documents_uploaded, is_bank_details_added, is_vehicle_verified, is_documents_verified, is_bank_details_verified, rating, created_at, vehicle_type';
+  'id, name, email, phone, profile_pic_url, is_online, is_verified, is_vehicle_added, is_documents_uploaded, is_bank_details_added, is_vehicle_verified, is_documents_verified, is_bank_details_verified, rating, created_at, vehicle_type, registration_fee_paid';
 
 /** All drivers, newest first. */
 export async function fetchDrivers(): Promise<DriverRow[]> {
@@ -142,8 +142,24 @@ export async function fetchDriverDetail(driverId: string): Promise<DriverDetail>
   if (driverRes.error) throw new Error(`Failed to load driver: ${driverRes.error.message}`);
   if (!driverRes.data) throw new Error('Driver not found.');
 
+  // Fetch registration_fee_paid separately — if the column doesn't exist in the
+  // DB yet, this returns null without crashing the rest of the page.
+  let registration_fee_paid: boolean | null = null;
+  try {
+    const { data: feeData } = await supabase
+      .from('drivers')
+      .select('registration_fee_paid')
+      .eq('id', driverId)
+      .maybeSingle();
+    if (feeData && 'registration_fee_paid' in feeData) {
+      registration_fee_paid = (feeData as { registration_fee_paid: boolean | null }).registration_fee_paid;
+    }
+  } catch {
+    // column does not exist yet — leave as null
+  }
+
   return {
-    driver: driverRes.data as DriverRow,
+    driver: { ...(driverRes.data as DriverRow), registration_fee_paid },
     vehicle: (vehicleRes.data?.[0] as VehicleRow) ?? null,
     documents: (docsRes.data?.[0] as DocumentsRow) ?? null,
     bank: (bankRes.data?.[0] as BankDetailsRow) ?? null,
