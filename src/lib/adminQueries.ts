@@ -421,7 +421,7 @@ async function fetchActivityStats(
 
 /** Everything the customer profile screen shows. */
 export async function fetchCustomerDetail(userId: string): Promise<CustomerDetailData> {
-  const [userRes, addressRes, stats] = await Promise.all([
+  const [userRes, addressRes, stats, ridesRes] = await Promise.all([
     supabase
       .from('users')
       .select('id, full_name, phone_number, email, role, created_at')
@@ -434,6 +434,13 @@ export async function fetchCustomerDetail(userId: string): Promise<CustomerDetai
       .order('is_default', { ascending: false })
       .limit(1),
     fetchActivityStats('customer_id', userId),
+    supabase
+      .from('bookings')
+      .select(
+        'id, customer_id, customer_name, customer_phone, driver_id, driver_name, status, amount, service, pickup_address, drop_address, created_at'
+      )
+      .eq('customer_id', userId)
+      .order('created_at', { ascending: false }),
   ]);
 
   if (userRes.error) throw new Error(`Failed to load customer: ${userRes.error.message}`);
@@ -443,6 +450,7 @@ export async function fetchCustomerDetail(userId: string): Promise<CustomerDetai
     user: userRes.data as UserRow,
     address: addressRes.data?.[0]?.address ?? null,
     stats,
+    rides: (ridesRes.data ?? []) as BookingRow[],
   };
 }
 
