@@ -95,6 +95,8 @@ export interface CustomerDetailData {
    */
   address: string | null;
   stats: ActivityStats;
+  /** All bookings where this user is the customer, newest first. */
+  rides: BookingRow[];
 }
 
 export interface DriverProfileData extends DriverDetail {

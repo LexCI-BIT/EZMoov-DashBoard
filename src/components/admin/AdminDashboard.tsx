@@ -1017,8 +1017,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
         {/* --------------------------- USER MANAGEMENT --------------------------- */}
         {activeTab === 'users' && data && viewCustomerId && (
-          <CustomerDetail userId={viewCustomerId} onBack={() => setViewCustomerId(null)} />
+          <CustomerDetail userId={viewCustomerId} onBack={() => setViewCustomerId(null)} driverMap={driverMap} />
         )}
+
 
         {activeTab === 'users' && data && viewDriverId && (
           <DriverProfile driverId={viewDriverId} onBack={() => setViewDriverId(null)} />
